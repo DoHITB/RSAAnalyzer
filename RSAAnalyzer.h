@@ -1,7 +1,7 @@
 /*
  * RSAAnalyzer.h
  *
- *  Created on: 25 ene. 2020
+ *  Created on: 27 sep. 2020
  *      Author: DoHITB
  */
 
@@ -24,6 +24,10 @@ void gaussS(void* equation1, void* equation2);
 int getY(int* arr);
 int getZF(int* arr);
 void solve(void* dif, void* sols);
+void distance(void* base, int z, int y, int s, void* res);
+void axisFactor(void* a);
+int checkSolution(void* factor, int ending, void* num);
+char* printSolution(void* factor, int ending, void* num);
 
 int memchk(int n, ...);
 
