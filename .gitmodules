@@ -1,0 +1,6 @@
+[submodule "Logging.c"]
+	path = Logging.c
+	url = https://github.com/DoHITB/Logging.c
+[submodule "BigInteger.c"]
+	path = BigInteger.c
+	url = https://github.com/DoHITB/BigInteger.c
