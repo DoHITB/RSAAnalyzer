@@ -4,6 +4,8 @@ RSA Analyzer, based on BigInteger architecture and David Sole's CPC Theoreme (ht
 It performs initial analysis for CPC0, then iterates over all CPC set.
 To achieve this, RSAAnalyzer performs fake-parallelism via bat files
 
+This project uses BigInteger.c (https://github.com/DoHITB/BigInteger.c) and Logging.c (https://github.com/DoHITB/Logging.c) projects
+
            
            
                    +----------------------+
