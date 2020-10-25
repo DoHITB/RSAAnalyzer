@@ -23,11 +23,17 @@ void gaussM(void* factor, void* equation);
 void gaussS(void* equation1, void* equation2);
 int getY(int* arr);
 int getZF(int* arr);
+int getS(int* arr);
 void solve(void* dif, void* sols);
 void distance(void* base, int z, int y, int s, void* res);
 void axisFactor(void* a);
 int checkSolution(void* factor, int ending, void* num);
 char* printSolution(void* factor, int ending, void* num);
+int relativeFactor(int s, int* arr);
+int relativeFactorResult(int s, void* sq);
+
+//temporal
+void testing();
 
 int memchk(int n, ...);
 
