@@ -2,7 +2,7 @@
  * RSAAnalyzer.c
  *
  *  Created on: 27 sep. 2020
- *      Author: DoHITB 
+ *      Author: DoHITB
  */
 #include "conio.h"
 #include "stdio.h"
@@ -12,7 +12,7 @@
 #include "RSAAnalyzer.h"
 #include "Logging.h"
 #include "stdarg.h"
-
+#include "math.h"
 
  /* if num ends on...
   *            0, 1, 2, 3, 4, 5, 6, 7, 8, 9*/
@@ -97,6 +97,8 @@ int main(int argc, char* argv[]) {
   int op;
   int y;
   int zf;
+  int rf;
+  int ri = 0;
 
   //Equation solving
   struct BigInteger* sols = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 2);
@@ -118,6 +120,11 @@ int main(int argc, char* argv[]) {
 
   //TODO => memchk
 
+  //temporal
+  if (debug == 2) {
+    testing();
+  }
+
   iniStr(&st1);
   iniStr(&st2);
   iniStr(&st3);
@@ -129,15 +136,17 @@ int main(int argc, char* argv[]) {
 
   //start tracing
   if(argc == 1) {
-    activateLog(ERROR);
+    activateLog(INFORMATIONAL);
   }else{
     name = (char*)malloc(sizeof(char) * 5000);
 
     //num_arr_s.dat
     snprintf(name, 5000, "%s_%s_%s.log", argv[1], argv[2], argv[3]);
     setFile(name);
-    activateLog(ERROR);
+    activateLog(INFORMATIONAL);
   }
+
+  setShowTime(0);
 
   //get number
   if (argc == 1) {
@@ -245,7 +254,7 @@ int main(int argc, char* argv[]) {
     //RSAAnalyzer.exe num #arr #S
 
     //delete previous files
-    system("del.bat");
+    system("del.bat 2>nul");
 
     _log("", INFORMATIONAL);
     _log("Base execution. Generating execution pool", INFORMATIONAL);
@@ -304,13 +313,15 @@ int main(int argc, char* argv[]) {
     toString(num, st1);
 
     if (arr1[0] > 0) {
+      _log("First pair pool: ", INFORMATIONAL);
+      inFunction();
       //arr1 have data. Possible combinations:
       //{1, 1}, {1, 3}, {1, 7}, {1, 9} => S = arr1[1]
       for (pi = 0; pi < arr1[1]; pi++) {
         ppi = pi;
 
         if (ppi == 0)
-          ppi = arr1[1] - 1;
+          ppi = arr1[1];
 
         snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 1, ppi);
         _log("Command: %s", INFORMATIONAL, pool);
@@ -318,9 +329,13 @@ int main(int argc, char* argv[]) {
         fputs(pool, fl);
         fputs("\n", fl);
       }
+
+      outFunction();
     }
 
     if (arr2[0] > 0) {
+      _log("Second pair pool: ", INFORMATIONAL);
+      inFunction();
       //arr2 have data. Possilbe combinations:
       //{3, 7}, {7, 9}, {3, 9}, {3, 3}
       if (arr2[0] == 3)
@@ -342,7 +357,7 @@ int main(int argc, char* argv[]) {
         ppi = pi;
 
         if (ppi == 0)
-          ppi = arr1[1] - 1;
+          ppi = px;
 
         snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 2, ppi);
         _log("Command: %s", INFORMATIONAL, pool);
@@ -350,18 +365,23 @@ int main(int argc, char* argv[]) {
         fputs(pool, fl);
         fputs("\n", fl);
       }
+
+      outFunction();
     }
 
     if (arr3[0] > 0) {
+      _log("Third pair pool: ", INFORMATIONAL);
+      inFunction();
       //arr3 have data. Possible combinations:
       //{9, 9}, {7, 7} => S = 1
-      snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 3, arr[1] - 1);
+      snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 3, arr3[1]);
       _log("Command: %s", INFORMATIONAL, pool);
       fputs("START /B ", fl);
       fputs(pool, fl);
       fputs("\n", fl);
     }
 
+    outFunction();
     outFunction();
 
     fflush(fl);
@@ -393,8 +413,8 @@ int main(int argc, char* argv[]) {
       s = atoi(argv[3]);
     }else {
       //Debug Override
-      op = 1;
-      s = 0;
+      op = 2;
+      s = 1;
     }
 
     if (op == 1) {
@@ -423,6 +443,8 @@ int main(int argc, char* argv[]) {
     y = getY(arr);
     zf = getZF(arr);
     axisFactor(sq);
+    rf = relativeFactor(getS(arr), arr);
+    ri = relativeFactorResult(getS(arr), sq);
 
     //dump data
     _log("Selected data {%i}:", INFORMATIONAL, op);
@@ -439,6 +461,8 @@ int main(int argc, char* argv[]) {
     _log("y: %i", INFORMATIONAL, y);
     _log("z factor: %i", INFORMATIONAL, zf);
     _log("s: %i", INFORMATIONAL, s);
+    _log("rf: %i", INFORMATIONAL, rf);
+    _log("ri: %i", INFORMATIONAL, ri);
     _log("", INFORMATIONAL);
 
     outFunction();
@@ -463,13 +487,20 @@ int main(int argc, char* argv[]) {
     //n = tempVal[2]
     memcpy(n, &tempVal[2], sizeof(struct BigInteger));
 
-    //data[count] = chk
-    memcpy(&data[count], chk, sizeof(struct BigInteger));
+    //if rf = -1 means always store (arr[0] = arr[1])
+    //if rf > 0 means that we have some "s" data.
+    if (rf == -1 || ri % rf == (s - 1)) {
+      //data[count] = chk
+      memcpy(&data[count], chk, sizeof(struct BigInteger));
 
-    //aixs[count] = sq
-    memcpy(&axis[count], sq, sizeof(struct BigInteger));
+      //aixs[count] = sq
+      memcpy(&axis[count], sq, sizeof(struct BigInteger));
 
-    ++count;
+      ++count;
+    }
+
+    //ri holds a counter to check congruency with rf mod s
+    ++ri;
 
     while (done == 1) {
       //ant = chk
@@ -478,9 +509,7 @@ int main(int argc, char* argv[]) {
       //sqrtAprox1 += 10;
       add(sqrtAprox, ten);
 
-      //sq++;
-      add(sq, one);
-
+      //get next value
       getPonderated(num, arr[0], sqrtAprox, k, z, n, tempVal);
 
       //n = tempVal[2]
@@ -494,13 +523,25 @@ int main(int argc, char* argv[]) {
       memcpy(chk, res, sizeof(struct BigInteger));
       sub(chk, num);
 
-      //data[count] = chk
-      memcpy(&data[count], chk, sizeof(struct BigInteger));
+      //if rf = -1 means always store (arr[0] = arr[1])
+      //if rf > 0 means that we have some "s" data.
+      if (rf == -1 || ri % rf == (s - 1)) {
+        add(sq, one);
 
-      //aixs[count] = sq
-      memcpy(&axis[count], sq, sizeof(struct BigInteger));
+        //data[count] = chk
+        memcpy(&data[count], chk, sizeof(struct BigInteger));
 
-      ++count;
+        //aixs[count] = sq
+        memcpy(&axis[count], sq, sizeof(struct BigInteger));
+
+        ++count;
+      }else {
+        //rf > 0 || rs % s != 0 => that means, have subseries and not time to store values
+        if (count == 0) {
+          //whereas we don't store any value, we keep treating sq as an auto-increment
+          add(sq, one);
+        }
+      }
 
       equals(chk, zro, eq);
 
@@ -523,6 +564,8 @@ int main(int argc, char* argv[]) {
         _log("Data gathered", INFORMATIONAL);
         done = 0;
       }
+
+      ++ri;
     }
 
     _log("", INFORMATIONAL);
@@ -712,7 +755,17 @@ int getZ(int* n, int num) {
 //Get ponderated SQRT value for num
 void getSqrt(void* num, int* arr, void* res) {
     int gsEnd;
+    int s;
     struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+    struct BigInteger* aux = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+
+    int mmi = 2;
+    int mm;
+
+    mm = memchk(mmi, ten, aux);
+
+    if (mm < 0)
+      exit(-109);
     
     if (arr[1] == 0) {
         BImemcpy(res, 0);
@@ -721,10 +774,31 @@ void getSqrt(void* num, int* arr, void* res) {
 
     //initialize values
     BImemcpy(ten, 10);
+    BImemcpy(aux, 0);
 
     //get sqrt
     memcpy(res, num, sizeof(struct BigInteger));
     nqrt(res, 2);
+
+    //get S factor
+    s = getS(arr);
+
+    //get sqrt(s), only if there are subseries
+    if (relativeFactor(s, arr) > 0) {
+      s = (int)(sqrt((double)s));
+
+      //if s == 3, sqrt(s) will be 1, so we add an unit
+      if (s == 1)
+        ++s;
+    }else
+      s = 1;
+
+    //convert s to BI
+    aux->n[0] = s;
+    aux->count = 0;
+
+    //res *= aux
+    mul(res, aux);
 
     //get the ending
     gsEnd = getEnd(res);
@@ -737,6 +811,7 @@ void getSqrt(void* num, int* arr, void* res) {
     ((struct BigInteger*)res)->n[0] = arr[1];
 
     free(ten);
+    free(aux);
 }
 
 //Get Y value
@@ -800,8 +875,57 @@ int getZF(int* arr) {
     }else {
       return 3;
     }
-  }else if (arr[1] == 7) {
+  }else if (arr[0] == 7) {
     //{7, 9}
+    return 7;
+  }
+
+  return -1;
+}
+
+//Get S value
+int getS(int* arr) {
+/*
+ * Params Table
+ *
+ * ----------------------------------------
+ *| arr[0] |  arr[1]  |  Z  |   Y  |   S   |
+ *|--------+----------+-----+------+-------|
+ *|      1 |       1  |  1  |   1  |   1   |
+ *|      1 |       3  |  3  |   3  |   3   |
+ *|      1 |       7  |  7  |   7  |   7   |
+ *|      1 |       9  |  9  |   9  |   9   |
+ *|      3 |       3  |  3  |   3  |   1   |
+ *|      3 |       7  |  9  |   7  |   9   |
+ *|      3 |       9  |  3  |   9  |   3   |
+ *|      7 |       7  |  7  |   7  |   1   |
+ *|      7 |       9  |  7  |   9  |   7   |
+ *|      9 |       9  |  9  |   9  |   1   |
+ * ----------------------------------------
+ */
+  if (arr[0] == 1) {
+    //1x => S = arr[1]
+    return arr[1];
+  }
+
+  if (arr[0] == arr[1]) {
+    //xx => S = x
+    return arr[1];
+  }
+
+  if (arr[0] == 3) {
+    //3x ({3, 7}, {3, 9})
+    if (arr[1] == 7) {
+      //37 => S = 9
+      return 9;
+    }else {
+      //39 => S = 3
+      return 3;
+    }
+  }
+
+  if (arr[0] == 7) {
+    //79 => S = 7
     return 7;
   }
 
@@ -830,6 +954,41 @@ void axisFactor(void* a) {
 
   free(ten);
   free(one);
+}
+
+//Returns quantity of data to skip
+int relativeFactor(int s, int* arr) {
+  if (arr[0] == arr[1]) {
+    return -1;
+  }
+
+  return s;
+}
+
+//Returns sq%s
+int relativeFactorResult(int s, void* sq) {
+  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* org = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  int ret;
+
+  if (tmp == NULL || org == NULL)
+    exit(-602);
+
+  BImemcpy(tmp, 0);                             //tmp = 0;
+  tmp->n[0] = s;                                //tmp = s;
+  memcpy(org, sq, sizeof(struct BigInteger));   //org = sq;
+
+  dvs(org, tmp);                                //org /= tmp;
+  mul(org, tmp);                                //org *= tmp;
+  memcpy(tmp, sq, sizeof(struct BigInteger));   //tmp = sq;
+  sub(tmp, org);                                //tmp -= org;
+
+  ret = tmp->n[0];                              //ret = org;
+
+  free(tmp);
+  free(org);
+
+  return ret;
 }
 
 //Return ponderated value based on David Sole's Theoreme
@@ -1435,7 +1594,6 @@ void regression(void* data, void* axis, void* dif) {
   free(st4);
 }
 
-
 //Return absolute value for n
 void absolute(void* n) {
   struct BigInteger* z = (struct BigInteger*)malloc(sizeof(struct BigInteger));
@@ -1462,7 +1620,6 @@ void absolute(void* n) {
   free(m);
   free(r);
 }
-
 
 //Return signum distinctive
 void gsignum(void* a, void* b, void* res) {
@@ -1518,17 +1675,19 @@ void gaussS(void* equation1, void* equation2) {
     add(&((struct BigInteger*)equation1)[i], &((struct BigInteger*)equation2)[i]);    //  equation1[i] += equation2[i];
 }
 
-//Solves a 2-degree equation (ax^2 + bx + c = 0
+//Solves a 2-degree equation (ax^2 + bx + c = 0)
 void solve(void* dif, void* sols) {
   struct BigInteger* min = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* two = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* four = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* b2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* zro = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
-  int mmi = 4;
+  int mmi = 5;
   int mm;
+  int ret;
 
-  mm = memchk(mmi, min, two, four, b2);
+  mm = memchk(mmi, min, two, four, b2, zro);
 
   if (mm < 0)
     exit(-301);
@@ -1536,6 +1695,7 @@ void solve(void* dif, void* sols) {
   //initialize data                                                               ////initialize data
   BImemcpy(min, -1);                                                              //min = -1;
   BImemcpy(two, 1);                                                               //two = 1;
+  BImemcpy(zro, 0);                                                               //zro = 0;
   add(two, two);                                                                  //two++; (two = 2)
 
   memcpy(four, two, sizeof(struct BigInteger));                                   //four = two;
@@ -1578,10 +1738,19 @@ void solve(void* dif, void* sols) {
   //(-b - sqrt(b^2 - 4ac)) / 2a                                                   ////(-b - sqrt(b^2 - 4ac)) / 2a
   dvs(&((struct BigInteger*)sols)[1], two);                                       //  sols[1] /= two;
 
+  equals(&((struct BigInteger*)sols)[0], zro, &ret);
+
   free(min);
   free(two);
   free(four);
   free(b2);
+  free(zro);
+
+  if (ret == 0 || ret == 2) {
+    //x1 solution <= 0
+    _log("A solution reached 0 or below. Exiting thread", INFORMATIONAL);
+    exit(0);
+  }
 }
 
 //Calculate the distance of the CPC based on David Sole's CPC Theoreme
@@ -1597,6 +1766,7 @@ void distance(void* base, int z, int y, int s, void* res) {
   char* chz = (char*)malloc(sizeof(char) * 2);
   char* chy = (char*)malloc(sizeof(char) * 2);
   char* chs = (char*)malloc(sizeof(char) * 2);
+  char* cmp;
 
   int mmi = 11;
   int mm;
@@ -1612,6 +1782,8 @@ void distance(void* base, int z, int y, int s, void* res) {
   BImemcpy(hun, 100);                                                             //hun = 100;
   BImemcpy(tho, 100);                                                             //tho = 100;
 
+  iniStr(&cmp);
+
   mul(tho, ten);                                                                  //tho *= 10; (1000)
 
   //convert int to BI                                                             ////convert int to BI
@@ -1626,7 +1798,7 @@ void distance(void* base, int z, int y, int s, void* res) {
   //s                                                                             ////s
   _itoa_s(s, chs, 2, 10);                                                         //s.toString();
   newBI(bis, chs, 0);                                                             //s.toBI();
-  add(bis, one);                                                                  //bis += one;
+  //add(bis, one);                                                                //bis += one;
 
   //a increase: 0                                                                 ////a increase: 0
   BImemcpy(&((struct BigInteger*)res)[0], 0);                                     //res[0] = 0;
@@ -1635,14 +1807,44 @@ void distance(void* base, int z, int y, int s, void* res) {
   memcpy(&((struct BigInteger*)res)[1], biz, sizeof(struct BigInteger));          //res[1] = biz;
   mul(&((struct BigInteger*)res)[1], tho);                                        //res[1] *= tho;
 
-  //c increase: (Y * 100) - 1000 - (1000 * (Z - S))                               ////c increase: (Y * 100) - 1000 - (1000 * (Z - S))
+  //c increase: ((Y * 100) - 1000) - (1000 * (Z - S))                             ////c increase: ((Y * 100) - 1000) - (1000 * (Z - S))
+  //  Z - S                                                                       ////  Z - S
   memcpy(tmp, biz, sizeof(struct BigInteger));                                    //tmp = biz;
   sub(tmp, bis);                                                                  //tmp -= bis;
+
+  toString(biz, cmp);
+  _log("Z = %s", INFORMATIONAL, cmp);
+
+  toString(bis, cmp);
+  _log("S = %s", INFORMATIONAL, cmp);
+
+  toString(tmp, cmp);
+  _log("Z - S = %s", INFORMATIONAL, cmp);
+
+  //  1000 * (Z - S)                                                              ////  1000 * (Z - S)
   mul(tmp, tho);                                                                  //tmp *= tho; 
+
+  toString(tmp, cmp);
+  _log("1000 * (Z - S) = %s", INFORMATIONAL, cmp);
+
+  //  Y * 100                                                                     ////  Y * 100
   memcpy(&((struct BigInteger*)res)[2], biy, sizeof(struct BigInteger));          //res[2] = biy;
   mul(&((struct BigInteger*)res)[2], hun);                                        //res[2] *= hun
+
+  toString(&((struct BigInteger*)res)[2], cmp);
+  _log("Y * 100 = %s", INFORMATIONAL, cmp);
+
+  //  (Y * 100) - 1000                                                            ////  (Y * 100) - 1000
   sub(&((struct BigInteger*)res)[2], tho);                                        //res[2] -= tho;
+
+  toString(&((struct BigInteger*)res)[2], cmp);
+  _log("(Y * 100) - 1000 = %s", INFORMATIONAL, cmp);
+
+  //  ((Y * 100) - 1000) - (1000 * (Z - S))                                       ////  ((Y * 100) - 1000) - (1000 * (Z - S))
   sub(&((struct BigInteger*)res)[2], tmp);                                        //res[2] -= tmp;
+
+  toString(&((struct BigInteger*)res)[2], cmp);
+  _log("((Y * 100) - 1000) - (1000 * (Z - S)) = %s", INFORMATIONAL, cmp);
 
   free(one);
   free(ten);
@@ -1667,6 +1869,7 @@ int checkSolution(void* factor, int ending, void* num) {
   struct BigInteger* bending = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int* pres = (int*)malloc(sizeof(int));
   char* ch = (char*)malloc(sizeof(char) * 2);
+  char* str;
   int res;
 
   int mmi = 8;
@@ -1676,6 +1879,8 @@ int checkSolution(void* factor, int ending, void* num) {
 
   if (mm < 0)
     exit(-405);
+
+  iniStr(&str);
 
   //inis                                                                          ////inis
   BImemcpy(one, 1);                                                               //one = 1;
@@ -1693,6 +1898,9 @@ int checkSolution(void* factor, int ending, void* num) {
   mul(fac, ten);                                                                  //fac *= 10;
   add(fac, bending);                                                              //fac += ending;
   memcpy(a, fac, sizeof(struct BigInteger));                                      //a = fac;
+
+  toString(fac, str);
+  _log("factor: %s", INFORMATIONAL, str);
 
   dvs(b, fac);                                                                    //b /= fac;
   mul(b, a);                                                                      //b *= a;
@@ -1779,4 +1987,8 @@ int memchk(int n, ...) {
             return -1 * n;
 
     return 0;
+}
+
+void testing() {
+  exit(0);
 }
