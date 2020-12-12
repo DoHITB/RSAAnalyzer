@@ -2,7 +2,7 @@
  * RSAAnalyzer.c
  *
  *  Created on: 27 sep. 2020
- *      Author: DoHITB
+ *      Author: DoHITB under MIT Liscense
  */
 #include "conio.h"
 #include "stdio.h"
@@ -31,31 +31,39 @@ int SEVERE = 1;
 int ERROR = 2;
 int MAX = 3;
 
+int CUDA_ON =
+#if IS_CUDA_ON == 1
+1;
+#else
+0;
+#endif
+
+
 int main(int argc, char* argv[]) {
   //General values
   char number[4097];
-  struct BigInteger* num = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* n = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sqrtAprox1 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sqrtAprox2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sqrtAprox3 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sq1 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sq2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sq3 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* chk = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ant = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* zro = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int* arr1 = (int*)malloc(sizeof(int) * 2);
-  int* arr2 = (int*)malloc(sizeof(int) * 2);
-  int* arr3 = (int*)malloc(sizeof(int) * 2);
-  int* eq = (int*)malloc(sizeof(int));
-  struct BigInteger* tempVal = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 3);
-  struct BigInteger* data = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 3);
-  struct BigInteger* axis = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 3);
-  struct BigInteger* dif = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* num = malloc(sizeof(struct BigInteger));
+  struct BigInteger* n = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sqrtAprox1 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sqrtAprox2 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sqrtAprox3 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sq1 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sq2 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sq3 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* chk = malloc(sizeof(struct BigInteger));
+  struct BigInteger* res = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ant = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* zro = malloc(sizeof(struct BigInteger));
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
+  int* arr1 = malloc(sizeof(int) * 2);
+  int* arr2 = malloc(sizeof(int) * 2);
+  int* arr3 = malloc(sizeof(int) * 2);
+  int* eq = malloc(sizeof(int));
+  struct BigInteger* tempVal = malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* data = malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* axis = malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* dif = malloc(sizeof(struct BigInteger) * 3);
   int k1;
   int k2;
   int k3;
@@ -82,15 +90,18 @@ int main(int argc, char* argv[]) {
   char* st1;
   char* st2;
   char* st3;
+  char* st4;
+  char* st5;
+  char* st6;
   int possi;
 
   //logging
   char* name;
 
   //Gather & calculate
-  struct BigInteger* sqrtAprox = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sq = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int* arr = (int*)malloc(sizeof(int) * 2);
+  struct BigInteger* sqrtAprox = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sq = malloc(sizeof(struct BigInteger));
+  int* arr = malloc(sizeof(int) * 2);
   int k;
   int z;
   int s;
@@ -101,24 +112,45 @@ int main(int argc, char* argv[]) {
   int ri = 0;
 
   //Equation solving
-  struct BigInteger* sols = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 2);
+  struct BigInteger* sols = malloc(sizeof(struct BigInteger) * 2);
 
   //Iteration solving
-  struct BigInteger* dist = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* dist = malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* bist = malloc(sizeof(struct BigInteger) * 3);
   int exr = -1;
   int ext = 0;
+  int* arrp = malloc(sizeof(int));
 
   //Beacon signal
   FILE* bcs; //send
   FILE* bcr; //receive
   int bcsl;
   int bcrl;
-  char* out = (char*)malloc(sizeof(char) * 5000);
+  char* out = malloc(sizeof(char) * 5000);
+  
+  //settings
+  FILE* set;
+  int setl;
+  char setc;
 
   //debug
   int debug = 0;
 
-  //TODO => memchk
+  //counting
+  struct BigInteger* i = malloc(sizeof(struct BigInteger));
+
+  //memory pool
+  struct memory* m = malloc(getMemorySize());
+
+  //memory checking
+  int mm;
+  int mmi = 32;
+
+  mm = memchk(mmi, num, n, sqrtAprox1, sqrtAprox2, sqrtAprox3, sq1, sq2, sq3, chk, res, ant, ten, zro, one, arr1, arr2, arr3, 
+                   eq, tempVal, data, axis, dif, sqrtAprox, sq, arr, sols, dist, bist, out, i, m, arrp);
+
+  if (mm < 0)
+    exit(mm);
 
   //temporal
   if (debug == 2) {
@@ -128,23 +160,34 @@ int main(int argc, char* argv[]) {
   iniStr(&st1);
   iniStr(&st2);
   iniStr(&st3);
+  iniStr(&st4);
+  iniStr(&st5);
+  iniStr(&st6);
+  init(m);
 
   //inis
   BImemcpy(ten, 10);
   BImemcpy(zro, 0);
   BImemcpy(one, 1);
+  BImemcpy(i, 0);
 
   //start tracing
   if(argc == 1) {
-    activateLog(INFORMATIONAL);
-  }else{
-    name = (char*)malloc(sizeof(char) * 5000);
+    activateLog(ERROR);
+  } else {
+    name = malloc(sizeof(char) * 5000);
 
     //num_arr_s.dat
     snprintf(name, 5000, "%s_%s_%s.log", argv[1], argv[2], argv[3]);
-    setFile(name);
-    activateLog(INFORMATIONAL);
+    
+    if(debug == 0)
+      setFile(name);
+    
+    activateLog(ERROR);
   }
+
+  if(debug > 0)
+    activateLog(INFORMATIONAL);
 
   setShowTime(0);
 
@@ -152,7 +195,7 @@ int main(int argc, char* argv[]) {
   if (argc == 1) {
     printf("Number to analyse: ");
     gets_s(number, 4096);
-  }else {
+  } else {
     strcpy_s(number, 4096, argv[1]);
   }
 
@@ -169,23 +212,23 @@ int main(int argc, char* argv[]) {
 
   toString(num, st1);
 
-  _log("Searching for: %s", INFORMATIONAL, st1);
-  _log("Initial data: ", INFORMATIONAL);
+  _log("Searching for: %s", ERROR, st1);
+  _log("Initial data: ", ERROR);
 
   inFunction();
-  _log("getEnd: %i", INFORMATIONAL, end);
+  _log("getEnd: %i", ERROR, end);
 
   //get possible multiplies
   poss(1, end, arr1);
   poss(2, end, arr2);
   poss(3, end, arr3);
 
-  _log("arr Values: ", INFORMATIONAL);
+  _log("arr Values: ", ERROR);
 
   inFunction();
-  _log("arr1: <%i, %i>", INFORMATIONAL, arr1[0], arr1[1]);
-  _log("arr2: <%i, %i>", INFORMATIONAL, arr2[0], arr2[1]);
-  _log("arr3: <%i, %i>", INFORMATIONAL, arr3[0], arr3[1]);
+  _log("arr1: <%i, %i>", ERROR, arr1[0], arr1[1]);
+  _log("arr2: <%i, %i>", ERROR, arr2[0], arr2[1]);
+  _log("arr3: <%i, %i>", ERROR, arr3[0], arr3[1]);
   outFunction();
 
   //get associated k's
@@ -193,34 +236,34 @@ int main(int argc, char* argv[]) {
   k2 = getK(arr2);
   k3 = getK(arr3);
 
-  _log("k Values: ", INFORMATIONAL);
+  _log("k Values: ", ERROR);
 
   inFunction();
-  _log("k1: %i", INFORMATIONAL, k1);
-  _log("k2: %i", INFORMATIONAL, k2);
-  _log("k3: %i", INFORMATIONAL, k3);
+  _log("k1: %i", ERROR, k1);
+  _log("k2: %i", ERROR, k2);
+  _log("k3: %i", ERROR, k3);
   outFunction();
 
   //get z's
   mod = getModulus(num);
 
-  _log("mod: %i", INFORMATIONAL, mod);
+  _log("mod: %i", ERROR, mod);
 
   z1 = getZ(arr1, mod);
   z2 = getZ(arr2, mod);
   z3 = getZ(arr3, mod);
 
-  _log("z Values: ", INFORMATIONAL);
+  _log("z Values: ", ERROR);
 
   inFunction();
-  _log("z1: %i", INFORMATIONAL, z1);
-  _log("z2: %i", INFORMATIONAL, z2);
-  _log("z3: %i", INFORMATIONAL, z3);
+  _log("z1: %i", ERROR, z1);
+  _log("z2: %i", ERROR, z2);
+  _log("z3: %i", ERROR, z3);
   outFunction();
 
-  getSqrt(num, arr1, sqrtAprox1);
-  getSqrt(num, arr2, sqrtAprox2);
-  getSqrt(num, arr3, sqrtAprox3);
+  getSqrt(num, arr1, sqrtAprox1, m);
+  getSqrt(num, arr2, sqrtAprox2, m);
+  getSqrt(num, arr3, sqrtAprox3, m);
 
   memcpy(sq1, sqrtAprox1, sizeof(struct BigInteger));
   memcpy(sq2, sqrtAprox2, sizeof(struct BigInteger));
@@ -230,12 +273,12 @@ int main(int argc, char* argv[]) {
   toString(sq2, st2);
   toString(sq3, st3);
 
-  _log("sqrt Values: ", INFORMATIONAL);
+  _log("sqrt Values: ", ERROR);
 
   inFunction();
-  _log("sq1: %s", INFORMATIONAL, st1);
-  _log("sq2: %s", INFORMATIONAL, st2);
-  _log("sq3: %s", INFORMATIONAL, st3);
+  _log("sq1: %s", ERROR, st1);
+  _log("sq2: %s", ERROR, st2);
+  _log("sq3: %s", ERROR, st3);
   outFunction();
   outFunction();
 
@@ -256,11 +299,11 @@ int main(int argc, char* argv[]) {
     //delete previous files
     system("del.bat 2>nul");
 
-    _log("", INFORMATIONAL);
-    _log("Base execution. Generating execution pool", INFORMATIONAL);
+    _log("", ERROR);
+    _log("Base execution. Generating execution pool", ERROR);
     inFunction();
 
-    _log("Starting waitlist...", INFORMATIONAL);
+    _log("Starting waitlist...", ERROR);
     efl = fopen_s(&fl2, "waitlist.bat", "w+");
 
     if (efl < 0)
@@ -271,7 +314,7 @@ int main(int argc, char* argv[]) {
     fflush(fl2);
     fclose(fl2);
 
-    _log("RSAWaitlist.exe started!", INFORMATIONAL);
+    _log("RSAWaitlist.exe started!", ERROR);
     system("waitlist.bat");
 
     /*
@@ -280,7 +323,7 @@ int main(int argc, char* argv[]) {
      * S will be downgraded by 1 as then it's upgraded
      * When S = 1 (arr[0] == arr[1]) we will move arr[1] - 1 as it's better for calculation
      * 
-     * ----------------------------------------
+     *+----------------------------------------+
      *| arr[0] |  arr[1]  |  Z  |   Y  |   S   |
      *|--------+----------+-----+------+-------|
      *|      1 |       1  |  1  |   1  |   1   |
@@ -293,7 +336,7 @@ int main(int argc, char* argv[]) {
      *|      7 |       7  |  7  |   7  |   1   |
      *|      7 |       9  |  7  |   9  |   7   |
      *|      9 |       9  |  9  |   9  |   1   |
-     * ----------------------------------------
+     *+----------------------------------------+
      */
 
     plen = num->count; //num
@@ -301,7 +344,7 @@ int main(int argc, char* argv[]) {
     plen += 4; // _#_#
     plen += 50; //exe name + extra space
 
-    pool = (char*)malloc(sizeof(char) * plen);
+    pool = malloc(sizeof(char) * plen);
     efl = fopen_s(&fl, "main.bat", "w+");
 
     if (efl < 0)
@@ -313,7 +356,7 @@ int main(int argc, char* argv[]) {
     toString(num, st1);
 
     if (arr1[0] > 0) {
-      _log("First pair pool: ", INFORMATIONAL);
+      _log("First pair pool: ", ERROR);
       inFunction();
       //arr1 have data. Possible combinations:
       //{1, 1}, {1, 3}, {1, 7}, {1, 9} => S = arr1[1]
@@ -324,7 +367,7 @@ int main(int argc, char* argv[]) {
           ppi = arr1[1];
 
         snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 1, ppi);
-        _log("Command: %s", INFORMATIONAL, pool);
+        _log("Command: %s", ERROR, pool);
         fputs("START /B ", fl);
         fputs(pool, fl);
         fputs("\n", fl);
@@ -334,7 +377,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (arr2[0] > 0) {
-      _log("Second pair pool: ", INFORMATIONAL);
+      _log("Second pair pool: ", ERROR);
       inFunction();
       //arr2 have data. Possilbe combinations:
       //{3, 7}, {7, 9}, {3, 9}, {3, 3}
@@ -360,7 +403,7 @@ int main(int argc, char* argv[]) {
           ppi = px;
 
         snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 2, ppi);
-        _log("Command: %s", INFORMATIONAL, pool);
+        _log("Command: %s", ERROR, pool);
         fputs("START /B ", fl);
         fputs(pool, fl);
         fputs("\n", fl);
@@ -370,12 +413,12 @@ int main(int argc, char* argv[]) {
     }
 
     if (arr3[0] > 0) {
-      _log("Third pair pool: ", INFORMATIONAL);
+      _log("Third pair pool: ", ERROR);
       inFunction();
       //arr3 have data. Possible combinations:
       //{9, 9}, {7, 7} => S = 1
       snprintf(pool, plen, "RSAAnalyzer.exe %s %i %i", st1, 3, arr3[1]);
-      _log("Command: %s", INFORMATIONAL, pool);
+      _log("Command: %s", ERROR, pool);
       fputs("START /B ", fl);
       fputs(pool, fl);
       fputs("\n", fl);
@@ -387,15 +430,15 @@ int main(int argc, char* argv[]) {
     fflush(fl);
     fclose(fl);
 
-    _log("Execution pool generated (main.bat)", INFORMATIONAL);
-    _log("Do not close this window. It will run on background and show the result on screen once done!", INFORMATIONAL);
-    _log("Starting the pool right now", INFORMATIONAL);
+    _log("Execution pool generated (main.bat)", ERROR);
+    _log("Do not close this window. It will run on background and show the result on screen once done!", ERROR);
+    _log("Starting the pool right now", ERROR);
 
     //start the pool
     system("main.bat");
 
     outFunction();
-  }else{
+  } else {
     /************************************
      *****GATHER & CALCULATE SECTION*****
      ************************************/
@@ -406,14 +449,14 @@ int main(int argc, char* argv[]) {
     BImemcpy(n, -1);
 
     if(debug == 0) {
-      _log("", INFORMATIONAL);
-      _log("Index: %s, Serie: %s", INFORMATIONAL, argv[2], argv[3]);
+      _log("", ERROR);
+      _log("Index: %s, Serie: %s", ERROR, argv[2], argv[3]);
 
       op = atoi(argv[2]);
       s = atoi(argv[3]);
-    }else {
+    } else {
       //Debug Override
-      op = 2;
+      op = 1;
       s = 1;
     }
 
@@ -423,62 +466,62 @@ int main(int argc, char* argv[]) {
       z = z1;
       memcpy(sqrtAprox, sqrtAprox1, sizeof(struct BigInteger));
       memcpy(sq, sq1, sizeof(struct BigInteger));
-    }else if (op == 2) {
+    } else if (op == 2) {
       memcpy(arr, arr2, sizeof(int) * 2);
       k = k2;
       z = z2;
       memcpy(sqrtAprox, sqrtAprox2, sizeof(struct BigInteger));
       memcpy(sq, sq2, sizeof(struct BigInteger));
-    }else if (op == 3) {
+    } else if (op == 3) {
       memcpy(arr, arr3, sizeof(int) * 2);
       k = k3;
       z = z3;
       memcpy(sqrtAprox, sqrtAprox3, sizeof(struct BigInteger));
       memcpy(sq, sq3, sizeof(struct BigInteger));
-    }else {
+    } else {
       exit(-2);
     }
 
     //get Y  and Z Factor
     y = getY(arr);
     zf = getZF(arr);
-    axisFactor(sq);
+    axisFactor(sq, m);
     rf = relativeFactor(getS(arr), arr);
-    ri = relativeFactorResult(getS(arr), sq);
+    ri = relativeFactorResult(getS(arr), sq, m);
 
     //dump data
-    _log("Selected data {%i}:", INFORMATIONAL, op);
+    _log("Selected data {%i}:", ERROR, op);
 
     inFunction();
     toString(sqrtAprox, st1);
     toString(sq, st2);
 
-    _log("arr: <%i, %i>", INFORMATIONAL, arr[0], arr[1]);
-    _log("k: %i", INFORMATIONAL, k);
-    _log("z: %i", INFORMATIONAL, z);
-    _log("sqrtAprox: %s", INFORMATIONAL, st1);
-    _log("Axis Factor: %s", INFORMATIONAL, st2);
-    _log("y: %i", INFORMATIONAL, y);
-    _log("z factor: %i", INFORMATIONAL, zf);
-    _log("s: %i", INFORMATIONAL, s);
-    _log("rf: %i", INFORMATIONAL, rf);
-    _log("ri: %i", INFORMATIONAL, ri);
-    _log("", INFORMATIONAL);
+    _log("arr: <%i, %i>", ERROR, arr[0], arr[1]);
+    _log("k: %i", ERROR, k);
+    _log("z: %i", ERROR, z);
+    _log("sqrtAprox: %s", ERROR, st1);
+    _log("Axis Factor: %s", ERROR, st2);
+    _log("y: %i", ERROR, y);
+    _log("z factor: %i", ERROR, zf);
+    _log("s: %i", ERROR, s);
+    _log("rf: %i", ERROR, rf);
+    _log("ri: %i", ERROR, ri);
+    _log("", ERROR);
 
     outFunction();
 
-    _log("Gathering data...", INFORMATIONAL);
+    _log("Gathering data...", ERROR);
 
     /* Data Gathering - START */
-    getPonderated(num, arr[0], sqrtAprox, k, z, n, tempVal);
+    getPonderated(num, arr[0], sqrtAprox, k, z, n, tempVal, m);
 
     //res = tempVal[0] * tempVal[1];
     memcpy(res, &tempVal[0], sizeof(struct BigInteger));
-    mul(res, &tempVal[1]);
+    mul(res, &tempVal[1], m);
 
     //chk = res - num
     memcpy(chk, res, sizeof(struct BigInteger));
-    sub(chk, num);
+    sub(chk, num, m);
 
     //done = true;
     done = 1;
@@ -507,26 +550,26 @@ int main(int argc, char* argv[]) {
       memcpy(ant, chk, sizeof(struct BigInteger));
 
       //sqrtAprox1 += 10;
-      add(sqrtAprox, ten);
+      add(sqrtAprox, ten, m);
 
       //get next value
-      getPonderated(num, arr[0], sqrtAprox, k, z, n, tempVal);
+      getPonderated(num, arr[0], sqrtAprox, k, z, n, tempVal, m);
 
       //n = tempVal[2]
       memcpy(n, &tempVal[2], sizeof(struct BigInteger));
 
       //res = tempVal[0] * tempVal[1];
       memcpy(res, &tempVal[0], sizeof(struct BigInteger));
-      mul(res, &tempVal[1]);
+      mul(res, &tempVal[1], m);
 
       //chk = res - num
       memcpy(chk, res, sizeof(struct BigInteger));
-      sub(chk, num);
+      sub(chk, num, m);
 
       //if rf = -1 means always store (arr[0] = arr[1])
       //if rf > 0 means that we have some "s" data.
       if (rf == -1 || ri % rf == (s - 1)) {
-        add(sq, one);
+        add(sq, one, m);
 
         //data[count] = chk
         memcpy(&data[count], chk, sizeof(struct BigInteger));
@@ -535,11 +578,11 @@ int main(int argc, char* argv[]) {
         memcpy(&axis[count], sq, sizeof(struct BigInteger));
 
         ++count;
-      }else {
+      } else {
         //rf > 0 || rs % s != 0 => that means, have subseries and not time to store values
         if (count == 0) {
           //whereas we don't store any value, we keep treating sq as an auto-increment
-          add(sq, one);
+          add(sq, one, m);
         }
       }
 
@@ -548,11 +591,11 @@ int main(int argc, char* argv[]) {
       if (*eq == 0) { //if(chk == 0)
         toString(&tempVal[0], st1);
         toString(&tempVal[1], st2);
-        _log("DONE! <%s, %s>", INFORMATIONAL, st1, st2);
+        _log("DONE! <%s, %s>", ERROR, st1, st2);
 
         done = 0;
         exr = 0;
-        ext = 0;
+        ext = -1;
 
         //copy it to sols to get printed
         memcpy(&sols[0], &tempVal[0], sizeof(struct BigInteger));
@@ -561,7 +604,7 @@ int main(int argc, char* argv[]) {
 
       //we only need 3 data samples
       if (count == 3) {
-        _log("Data gathered", INFORMATIONAL);
+        _log("Data gathered", ERROR);
         done = 0;
       }
 
@@ -589,90 +632,161 @@ int main(int argc, char* argv[]) {
 
     //it may be found while gathering data
     if (exr != 0) {
-      regression(data, axis, dif);
-      distance(dif, zf, y, s, dist);
+      regression(data, axis, dif, m);
+      distance(dif, zf, y, s, dist, m);
 
+      //dif holds "a", "b", and "c" params
       toString(&dif[0], st1);
       toString(&dif[1], st2);
       toString(&dif[2], st3);
       _log("dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
-      _log("Associated equation: %sx^2 + %sx + %s = 0", INFORMATIONAL, st1, st2, st3);
+      _log("Associated initial equation: %sx^2 + %sx + %s = 0", INFORMATIONAL, st1, st2, st3);
 
       toString(&dist[0], st1);
       toString(&dist[1], st2);
       toString(&dist[2], st3);
       _log("dist: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
 
+      _log("checking for lower limit", INFORMATIONAL);
+      lowerLimit(dif, dist, m);
+
+      toString(&dif[0], st1);
+      toString(&dif[1], st2);
+      toString(&dif[2], st3);
+      _log("after lowerLimit...", INFORMATIONAL);
+      _log("dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
+
+      _log("Hyperbolic-Potential limit...", INFORMATIONAL);
+      hbBolzano(dif, dist, bist, m);
+
       inFunction();
       _log("Solving x...", INFORMATIONAL);
 
-      solve(dif, sols);
+      solve(dif, sols, 1, m);
 
-      toString(&sols[0], st1);
-      toString(&sols[1], st2);
-      _log("Solutions: <%s, %s>", INFORMATIONAL, st1, st2);
+      toString(&sols[0], st4);
+      toString(&sols[1], st5);
+      _log("Solutions: <%s, %s>", INFORMATIONAL, st4, st5);
+
+      _log("%s\t%s\t%s\t%s\t%s", INFORMATIONAL, st1, st2, st3, st4, st5);
 
       outFunction();
 
       //sols[0] * sols[1] = num?
-      exr = checkSolution(&sols[0], arr[1], num);
+      exr = checkSolution(&sols[0], arr, num, m, arrp);
     }
 
-    //iterate until a solution is found on any thread
-    while (exr != 0) {
-      //look for another threads' solution
-      bcrl = fopen_s(&bcr, "RSAWL.dat", "r");
+    //close log to make it accesible
+    closeFile();
 
-      if (bcrl == 0) {
-        //a thread found a solution!
-        ext = 1; //external = 1
-        exr = 0; //stop iterate
+    add(i, one, m);
 
-        //close the file
-        if(bcr != NULL)
-          fclose(bcr);
-      }else {
-        //no thread found a solution. Keep searching
-        toString(&dif[0], st1);
-        toString(&dif[1], st2);
-        toString(&dif[2], st3);
-        _log("Invalid value for dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
-        _log("Searching for new values...", INFORMATIONAL);
+    if (CUDA_ON == 0) {
+      //CPU mode. Iterate until a solution is found on any thread
+      while (exr != 0) {
+        //look for another threads' solution
+        bcrl = fopen_s(&bcr, "RSAWL.dat", "r");
 
-        //get new values for dif
-        add(&dif[0], &dist[0]);
-        add(&dif[1], &dist[1]);
-        add(&dif[2], &dist[2]);
+        if (bcrl == 0) {
+          //a thread found a solution!
+          ext = 1; //external = 1
+          exr = 0; //stop iterate
 
-        toString(&dif[0], st1);
-        toString(&dif[1], st2);
-        toString(&dif[2], st3);
-        _log("dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
-        _log("Associated equation: %sx^2 + %sx + %s = 0", INFORMATIONAL, st1, st2, st3);
+          //close the file
+          if (bcr != NULL)
+            fclose(bcr);
+        } else {
+          //no thread found a solution. Keep searching
+          toString(&dif[0], st1);
+          toString(&dif[1], st2);
+          toString(&dif[2], st3);
+          _log("Invalid value for dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
+          _log("Searching for new values...", INFORMATIONAL);
 
-        inFunction();
-        _log("Solving x...", INFORMATIONAL);
+          //get new values for dif
+          add(&dif[0], &dist[0], m);
+          add(&dif[1], &dist[1], m);
+          add(&dif[2], &dist[2], m);
 
-        //solve new equation
-        solve(dif, sols);
+          toString(&dif[0], st1);
+          toString(&dif[1], st2);
+          toString(&dif[2], st3);
+          _log("dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
+          _log("Associated equation: %sx^2 + %sx + %s = 0", INFORMATIONAL, st1, st2, st3);
 
-        toString(&sols[0], st1);
-        toString(&sols[1], st2);
-        _log("Solutions: <%s, %s>", INFORMATIONAL, st1, st2);
+          inFunction();
+          _log("Solving x...", INFORMATIONAL);
 
-        outFunction();
+          //solve new equation
+          solve(dif, sols, 1, m);
 
-        //sols[0] * sols[1] = num?
-        exr = checkSolution(&sols[0], arr[1], num);
+          toString(&sols[0], st4);
+          toString(&sols[1], st5);
+          _log("Solutions: <%s, %s>", INFORMATIONAL, st4, st5);
+
+          _log("%s\t%s\t%s\t%s\t%s", INFORMATIONAL, st1, st2, st3, st4, st5);
+
+          outFunction();
+
+          //sols[0] * sols[1] = num?
+          exr = checkSolution(&sols[0], arr, num, m, arrp);
+
+          //increase counter
+          add(i, one, m);
+
+          //finally, check for any settings:
+          toString(i, st6);
+          _log("%s\t%s\t%s\t%s\t%s\t{%s}", ERROR, st1, st2, st3, st4, st5, st6);
+
+          setl = fopen_s(&set, "settings.txt", "r");
+
+          if (setl == 0) {
+            setc = fgetc(set);
+
+            if (setc == 'p') {
+              //p = print status
+              toString(i, st6);
+              _log("%s\t%s\t%s\t%s\t%s\t{%s}", ERROR, st1, st2, st3, st4, st5, st6);
+            } else if (setc == 'x') {
+              //x = quit
+              toString(i, st6);
+              _log("%s\t%s\t%s\t%s\t%s\t{%s}", ERROR, st1, st2, st3, st4, st5, st6);
+              _log("Quitting as per user requirement", ERROR);
+
+              //force remove
+              remove("settings.txt");
+
+              exit(0);
+            }
+
+            //close the file
+            fclose(set);
+
+            //then delete it
+            remove("settings.txt");
+
+            //close log file to make it accessible
+            closeFile();
+          }
+        }
       }
+    } else {
+      //GPU mode.
+      cudaMode(dif, dist, arr, num);
+
+      exit(0);
     }
 
-    //on this point, a solution has been found
+    //on this point, a solution has been found 
     if (ext == 0) {
-      //found on this thread!
+      //found on this thread (on the loop)!
       //prepare text
-      st1 = printSolution(&sols[0], arr[1], num);
-      snprintf(out, 5000, "%s_%s_%s.log: Solution %s", argv[1], argv[2], argv[3], st1);
+      st1 = printSolution(&sols[0], arr, num, m, arrp);
+      
+      if (debug == 0) {
+        snprintf(out, 5000, "%s_%s_%s.log: Solution %s", argv[1], argv[2], argv[3], st1);
+        _log("%s", ERROR, out);
+      }
 
       //write it on RSAWL.dat (open with w+ to avoid error during testing)
       bcsl = fopen_s(&bcs, "RSAWL.dat", "w+");
@@ -683,6 +797,23 @@ int main(int argc, char* argv[]) {
       fputs(out, bcs);
       fflush(bcs);
       fclose(bcs);
+    } else if (ext == -1) {
+        //found on this thread (while gathering data)!
+        //prepare text
+        toString(&sols[0], st1);
+        toString(&sols[1], st2);
+        snprintf(out, 5000, "%s_%s_%s.log: Solution <%s, %s>", argv[1], argv[2], argv[3], st1, st2);
+        _log("%s", ERROR, out);
+
+        //write it on RSAWL.dat (open with w+ to avoid error during testing)
+        bcsl = fopen_s(&bcs, "RSAWL.dat", "w+");
+
+        if (bcsl < 0 || bcs == NULL)
+            exit(-108);
+
+        fputs(out, bcs);
+        fflush(bcs);
+        fclose(bcs);
     }
 
     outFunction();
@@ -753,11 +884,11 @@ int getZ(int* n, int num) {
 }
 
 //Get ponderated SQRT value for num
-void getSqrt(void* num, int* arr, void* res) {
+void getSqrt(void* num, int* arr, void* res, void* m) {
     int gsEnd;
     int s;
-    struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* aux = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+    struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+    struct BigInteger* aux = malloc(sizeof(struct BigInteger));
 
     int mmi = 2;
     int mm;
@@ -778,7 +909,7 @@ void getSqrt(void* num, int* arr, void* res) {
 
     //get sqrt
     memcpy(res, num, sizeof(struct BigInteger));
-    nqrt(res, 2);
+    nqrt(res, 2, m);
 
     //get S factor
     s = getS(arr);
@@ -798,14 +929,14 @@ void getSqrt(void* num, int* arr, void* res) {
     aux->count = 0;
 
     //res *= aux
-    mul(res, aux);
+    mul(res, aux, m);
 
     //get the ending
     gsEnd = getEnd(res);
 
     //the ending is bigger? then skip to the next
     if (gsEnd > arr[1])
-        add(res, ten); //res += 10;
+        add(res, ten, m); //res += 10;
 
     //override ending with specific number
     ((struct BigInteger*)res)->n[0] = arr[1];
@@ -933,9 +1064,9 @@ int getS(int* arr) {
 }
 
 //Retrieve relative value based on axis data
-void axisFactor(void* a) {
-  struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+void axisFactor(void* a, void* m) {
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
 
   int mmi = 2;
   int mm;
@@ -949,8 +1080,8 @@ void axisFactor(void* a) {
   BImemcpy(ten, 10);                                                              //ten = 10;
   BImemcpy(one, 1);                                                               //one = 1;
 
-  dvs(a, ten);                                                                    //a /= ten;
-  add(a, one);                                                                    //a++;
+  dvs(a, ten, m);                                                                 //a /= ten;
+  add(a, one, m);                                                                 //a++;
 
   free(ten);
   free(one);
@@ -965,10 +1096,10 @@ int relativeFactor(int s, int* arr) {
   return s;
 }
 
-//Returns sq%s
-int relativeFactorResult(int s, void* sq) {
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* org = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+//Returns sq % s
+int relativeFactorResult(int s, void* sq, void* m) {
+  struct BigInteger* tmp = malloc(sizeof(struct BigInteger));
+  struct BigInteger* org = malloc(sizeof(struct BigInteger));
   int ret;
 
   if (tmp == NULL || org == NULL)
@@ -978,10 +1109,10 @@ int relativeFactorResult(int s, void* sq) {
   tmp->n[0] = s;                                //tmp = s;
   memcpy(org, sq, sizeof(struct BigInteger));   //org = sq;
 
-  dvs(org, tmp);                                //org /= tmp;
-  mul(org, tmp);                                //org *= tmp;
+  dvs(org, tmp, m);                             //org /= tmp;
+  mul(org, tmp, m);                             //org *= tmp;
   memcpy(tmp, sq, sizeof(struct BigInteger));   //tmp = sq;
-  sub(tmp, org);                                //tmp -= org;
+  sub(tmp, org, m);                             //tmp -= org;
 
   ret = tmp->n[0];                              //ret = org;
 
@@ -992,26 +1123,26 @@ int relativeFactorResult(int s, void* sq) {
 }
 
 //Return ponderated value based on David Sole's Theoreme
-void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res) {
+void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res, void* m) {
     int ipR;
     int ipR0;
-    struct BigInteger* pN = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* min = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* hun = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pTR = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pR0 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pR = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pNH = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pRT = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pA0 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* pA1 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* stk0 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* stk1 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    struct BigInteger* stk2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    int* ires = (int*)malloc(sizeof(int));
+    struct BigInteger* pN =   malloc(sizeof(struct BigInteger));
+    struct BigInteger* min =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* one =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* ten =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* hun =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* a =    malloc(sizeof(struct BigInteger));
+    struct BigInteger* pTR =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* pR0 =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* pR =   malloc(sizeof(struct BigInteger));
+    struct BigInteger* pNH =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* pRT =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* pA0 =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* pA1 =  malloc(sizeof(struct BigInteger));
+    struct BigInteger* stk0 = malloc(sizeof(struct BigInteger));
+    struct BigInteger* stk1 = malloc(sizeof(struct BigInteger));
+    struct BigInteger* stk2 = malloc(sizeof(struct BigInteger));
+    int* ires = malloc(sizeof(int));
     int mm;
     int mmi = 17;
 
@@ -1036,9 +1167,9 @@ void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res)
 
     if (*ires == 0) {                                                               //if(n == -1){
         memcpy(pN, num, sizeof(struct BigInteger));                                 //  pN = num;
-        dvs(pN, b);                                                                 //  pN = pN / b;
-        dvs(pN, hun);                                                               //  pN = pN / hun (100);
-    }else {                                                                         //}else{
+        dvs(pN, b, m);                                                              //  pN = pN / b;
+        dvs(pN, hun, m);                                                            //  pN = pN / hun (100);
+    } else {                                                                        //} else {
         memcpy(pN, n, sizeof(struct BigInteger));                                   //  pN = n;
     }                                                                               //}
 
@@ -1047,126 +1178,58 @@ void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res)
     pR->n[0] = ipR;                                                                 //pR = ipR;
 
     memcpy(pTR, b, sizeof(struct BigInteger));                                      //pTR = b;
-    sub(pTR, a);                                                                    //pTR = pTR - a;
-    dvs(pTR, ten);                                                                  //pTR = pTR / ten (10);
-    mul(pTR, pR0);                                                                  //pTR = pTR * pR0;
+    sub(pTR, a, m);                                                                 //pTR = pTR - a;
+    dvs(pTR, ten, m);                                                               //pTR = pTR / ten (10);
+    mul(pTR, pR0, m);                                                               //pTR = pTR * pR0;
 
-    add(pR, pTR);                                                                   //pR = pR + pTR;
+    add(pR, pTR, m);                                                                //pR = pR + pTR;
 
     memcpy(pNH, pN, sizeof(struct BigInteger));                                     //pNH = pN;
-    mul(pNH, hun);                                                                  //pNH = pNH * hun (100);
+    mul(pNH, hun, m);                                                               //pNH = pNH * hun (100);
 
     memcpy(pRT, pR, sizeof(struct BigInteger));                                     //pRT = pR;
-    mul(pRT, ten);                                                                  //pRT = pRT * ten (10);
+    mul(pRT, ten, m);                                                               //pRT = pRT * ten (10);
 
     memcpy(pA0, a, sizeof(struct BigInteger));                                      //pA0 = a;
-    add(pA0, pNH);                                                                  //pA0 = pA0 + pNH;
-    add(pA0, pRT);                                                                  //pA0 = pA0 + pRT;
+    add(pA0, pNH, m);                                                               //pA0 = pA0 + pNH;
+    add(pA0, pRT, m);                                                               //pA0 = pA0 + pRT;
 
     memcpy(pA1, b, sizeof(struct BigInteger));                                      //pA1 = b;
 
-/*VERSION 2*/
     //stk1 = ((((10 * pN--) + pR) * 10) + a)                                        //stk1 = ((((10 * pN--) + pR) * 10) + a)
     memcpy(stk1, pN, sizeof(struct BigInteger));                                    //  stk1 = pN;
-    mul(stk1, ten);                                                                 //  stk1 = pA0 * ten (10);
-    add(stk1, pR);                                                                  //  stk1 = pA0 * pR;
-    mul(stk1, ten);                                                                 //  stk1 = pA0 * ten (10);
-    add(stk1, a);                                                                   //  stk1 = pA0 + a;
-    sub(pN, one);                                                                   //  pN--;
+    mul(stk1, ten, m);                                                              //  stk1 = pA0 * ten (10);
+    add(stk1, pR, m);                                                               //  stk1 = pA0 * pR;
+    mul(stk1, ten, m);                                                              //  stk1 = pA0 * ten (10);
+    add(stk1, a, m);                                                                //  stk1 = pA0 + a;
+    sub(pN, one, m);                                                                //  pN--;
 
     //stk2 = ((((10 * pN) + pR) * 10) + a)                                          //  stk2 = ((((10 * pN) + pR) * 10) + a)
     memcpy(stk2, pN, sizeof(struct BigInteger));                                    //      stk2 = pN;
-    mul(stk2, ten);                                                                 //      stk2 = pA0 * ten (10);
-    add(stk2, pR);                                                                  //      stk2 = pA0 * pR;
-    mul(stk2, ten);                                                                 //      stk2 = pA0 * ten (10);
-    add(stk2, a);                                                                   //      stk2 = pA0 + a;
+    mul(stk2, ten, m);                                                              //      stk2 = pA0 * ten (10);
+    add(stk2, pR, m);                                                               //      stk2 = pA0 * pR;
+    mul(stk2, ten, m);                                                              //      stk2 = pA0 * ten (10);
+    add(stk2, a, m);                                                                //      stk2 = pA0 + a;
 
-    add(pN, one);                                                                   //pN++;
+    add(pN, one, m);                                                                //pN++;
 
-    mul(stk1, pA1);                                                                 //stk1 *= pA1; {n0}
-    mul(stk2, pA1);                                                                 //stk2 *= pA1; {n1}
+    mul(stk1, pA1, m);                                                              //stk1 *= pA1; {n0}
+    mul(stk2, pA1, m);                                                              //stk2 *= pA1; {n1}
 
     //pN = (pN - ((num - n0) / (n0 - n1)))
     memcpy(stk0, stk1, sizeof(struct BigInteger));                                  //stk0 = stk1;
 
-    sub(stk1, stk2);                                                                //stk1 -= stk2;
-    sub(stk0, num);                                                                 //stk1 -= num;
-    dvs(stk0, stk1);                                                                //stk0 /= stk1;
-    sub(pN, stk0);                                                                  //pN -= stk0
-/*VERSION 2*/
+    sub(stk1, stk2, m);                                                             //stk1 -= stk2;
+    sub(stk0, num, m);                                                              //stk1 -= num;
+    dvs(stk0, stk1, m);                                                             //stk0 /= stk1;
+    sub(pN, stk0, m);                                                               //pN -= stk0
 
-/*
-    //VERSION 1. Do not delete yet
-    isEq = isEqual(pA0, pA1, num);                                                  //¿pA0 * pA1 > num? => isEq
-
-    if (isEq == 1) {                                                                //if(pA0 * pA1 > num){
-        //pA0 = ((((10 * pN--) + pR) * 10) + a)                                     //  pA0 = ((((10 * pN--) + pR) * 10) + a)
-        memcpy(pA0, pN, sizeof(struct BigInteger));                                 //      pA0 = pN;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, pR);                                                               //      pA0 = pA0 * pR;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, a);                                                                //      pA0 = pA0 + a;
-        sub(pN, one);                                                               //      pN--;
-
-        isEq = isEqual(pA0, pA1, num);                                              //  ¿pA0 * pA1 > num? => isEq
-
-        while (isEq == 1) {                                                         //  while((((10 * (pN--) + pR) * 10) + a) * pA1 > num){
-            //pA0 = ((((10 * pN--) + pR) * 10) + a)                                 //      pA0 = ((((10 * pN--) + pR) * 10) + a)
-            memcpy(pA0, pN, sizeof(struct BigInteger));                             //          pA0 = pN;
-            mul(pA0, ten);                                                          //          pA0 = pA0 * ten (10);
-            add(pA0, pR);                                                           //          pA0 = pA0 * pR;
-            mul(pA0, ten);                                                          //          pA0 = pA0 * ten (10);
-            add(pA0, a);                                                            //          pA0 = pA0 + a;
-            sub(pN, one);                                                           //          pN--;
-
-            isEq = isEqual(pA0, pA1, num);                                          //      ¿pA0 * pA1 > num? => isEq
-        }                                                                           //  }
-
-        add(pN, one);                                                               //  pN++;
-        //pA0 = ((((10 * pN) + pR) * 10) + a)                                       //  pA0 = ((((10 * pN) + pR) * 10) + a)
-        memcpy(pA0, pN, sizeof(struct BigInteger));                                 //      pA0 = pN;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, pR);                                                               //      pA0 = pA0 * pR;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, a);                                                                //      pA0 = pA0 + a;
-
-        isEq = isEqual(pA0, pA1, num);                                              //  ¿pA0 * pA1 > num? => isEq
-
-        if (isEq == 2)                                                              //  if((((10 * (++pN) + pR) * 10) + a) * pA1 < num)
-            add(pN, one);                                                           //      pN++;
-    }else {                                                                         //}else{
-        //pA0 = ((((10 * ++pN) + pR) * 10) + a)                                     //  pA0 = ((((10 * ++pN) + pR) * 10) + a)
-        add(pN, one);                                                               //      pN++
-        memcpy(pA0, pN, sizeof(struct BigInteger));                                 //      pA0 = pN;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, pR);                                                               //      pA0 = pA0 * pR;
-        mul(pA0, ten);                                                              //      pA0 = pA0 * ten (10);
-        add(pA0, a);                                                                //      pA0 = pA0 + a;
-
-        isEq = isEqual(pA0, pA1, num);                                              //  ¿pA0 * pA1 > num? => isEq
-
-        while (isEq == 2) {                                                         //  while((((10 * (++pN) + pR) * 10) + a) * pA1 < num){
-            //pA0 = ((((10 * ++pN) + pR) * 10) + a)                                 //      pA0 = ((((10 * ++pN) + pR) * 10) + a)
-            add(pN, one);                                                           //          pN++
-            memcpy(pA0, pN, sizeof(struct BigInteger));                             //          pA0 = pN;
-            mul(pA0, ten);                                                          //          pA0 = pA0 * ten (10);
-            add(pA0, pR);                                                           //          pA0 = pA0 * pR;
-            mul(pA0, ten);                                                          //          pA0 = pA0 * ten (10);
-            add(pA0, a);                                                            //          pA0 = pA0 + a;
-
-            isEq = isEqual(pA0, pA1, num);                                          //      ¿pA0 * pA1 > num? => isEq
-        }                                                                           //  }
-
-        sub(pN, one);                                                               //  pN--;
-    }                                                                               //}
-
-*/
     //pA0 = (((10 * pN + pR) * 10) + a);                                            //pA0 = (((10 * pN + pR) * 10) + a);
     memcpy(pA0, pN, sizeof(struct BigInteger));                                     //  pA0 = pN;
-    mul(pA0, ten);                                                                  //  pA0 = pA0 * ten (10);
-    add(pA0, pR);                                                                   //  pA0 = pA0 * pR;
-    mul(pA0, ten);                                                                  //  pA0 = pA0 * ten (10);
-    add(pA0, a);                                                                    //  pA0 = pA0 + a;
+    mul(pA0, ten, m);                                                               //  pA0 = pA0 * ten (10);
+    add(pA0, pR, m);                                                                //  pA0 = pA0 * pR;
+    mul(pA0, ten, m);                                                               //  pA0 = pA0 * ten (10);
+    add(pA0, a, m);                                                                 //  pA0 = pA0 + a;
 
     memcpy(&((struct BigInteger*)res)[0], pA0, sizeof(struct BigInteger));          //res[0] = pA0;
     memcpy(&((struct BigInteger*)res)[1], pA1, sizeof(struct BigInteger));          //res[1] = pA1;
@@ -1192,22 +1255,22 @@ void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res)
 }
 
 //Returns BigInteger.equals(va * vb, n)
-int isEqual(void* va, void* vb, void* n) {
-    struct BigInteger* r = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-    int* k = (int*)malloc(sizeof(int));
+int isEqual(void* va, void* vb, void* n, void* m) {
+    struct BigInteger* r = malloc(sizeof(struct BigInteger));
+    int* k = malloc(sizeof(int));
     int x;
     int mm;
 
     mm = memchk(2, r, k);
 
     if (mm < 0) {
-        _log("Error", INFORMATIONAL);
+        _log("Error", ERROR);
         exit(-110);
     }
 
     memcpy(r, va, sizeof(struct BigInteger));   //r = va;
 
-    mul(r, vb);                                 //r = r * vb;
+    mul(r, vb, m);                              //r = r * vb;
     equals(r, n, k);                            // ¿r = n? => k
 
     memcpy(&x, k, sizeof(int));                 //x = k
@@ -1219,25 +1282,25 @@ int isEqual(void* va, void* vb, void* n) {
 }
 
 //Performs QR regression, then solve it via Gauss
-void regression(void* data, void* axis, void* dif) {
-  struct BigInteger* sxi1 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sxi2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sxi3 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sxi4 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* syi = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sxi1yi = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* sxi2yi = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* axisn = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* three = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* eq1 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* eq2 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* eq3 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* f1 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* f2 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* f3 = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
-  struct BigInteger* c = (struct BigInteger*)malloc(sizeof(struct BigInteger) * 4);
+void regression(void* data, void* axis, void* dif, void* m) {
+  struct BigInteger* sxi1 =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* sxi2 =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* sxi3 =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* sxi4 =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* syi =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* sxi1yi = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sxi2yi = malloc(sizeof(struct BigInteger));
+  struct BigInteger* axisn =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* three =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* eq1 =    malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* eq2 =    malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* eq3 =    malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* f1 =     malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* f2 =     malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* f3 =     malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* a =      malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* b =      malloc(sizeof(struct BigInteger) * 4);
+  struct BigInteger* c =      malloc(sizeof(struct BigInteger) * 4);
 
   //logging
   char* st1;
@@ -1274,31 +1337,31 @@ void regression(void* data, void* axis, void* dif) {
     //sxin: sum of i^n                                                            //  //sxin: sum of i^n
     //syi: sum of f(x)                                                            //  //syi: sum of f(x)
     //sxinyi: sum of i^n + yi                                                     //  //sxinyi: sum of i^n + yi
-    add(sxi1, &((struct BigInteger*)axis)[i]);                                    //  sxi1 += axis[i];
-    add(syi, &((struct BigInteger*)data)[i]);                                     //  syi += data[i];
+    add(sxi1, &((struct BigInteger*)axis)[i], m);                                 //  sxi1 += axis[i];
+    add(syi, &((struct BigInteger*)data)[i], m);                                  //  syi += data[i];
 
     memcpy(axisn, &((struct BigInteger*)axis)[i], sizeof(struct BigInteger));     //  axisn = axis[i];
 
-    mul(axisn, &((struct BigInteger*)axis)[i]);                                   //  axisn *= axis[i] (axisn^2);
-    add(sxi2, axisn);                                                             //  sxi2 += axisn;
+    mul(axisn, &((struct BigInteger*)axis)[i], m);                                //  axisn *= axis[i] (axisn^2);
+    add(sxi2, axisn, m);                                                          //  sxi2 += axisn;
 
-    mul(axisn, &((struct BigInteger*)axis)[i]);                                   //  axisn *= axis[i] (axisn^3);
-    add(sxi3, axisn);                                                             //  sxi3 += axisn;
+    mul(axisn, &((struct BigInteger*)axis)[i], m);                                //  axisn *= axis[i] (axisn^3);
+    add(sxi3, axisn, m);                                                          //  sxi3 += axisn;
 
-    mul(axisn, &((struct BigInteger*)axis)[i]);                                   //  axisn *= axis[i] (axisn^4);
-    add(sxi4, axisn);                                                             //  sxi4 += axisn;
+    mul(axisn, &((struct BigInteger*)axis)[i], m);                                //  axisn *= axis[i] (axisn^4);
+    add(sxi4, axisn, m);                                                          //  sxi4 += axisn;
 
     memcpy(axisn, &((struct BigInteger*)axis)[i], sizeof(struct BigInteger));     //  axisn = axis[i];
-    mul(axisn, &((struct BigInteger*)data)[i]);                                   //  axisn *= data[i];
-    add(sxi1yi, axisn);                                                           //  sxi1yi += axisn;
+    mul(axisn, &((struct BigInteger*)data)[i], m);                                //  axisn *= data[i];
+    add(sxi1yi, axisn, m);                                                        //  sxi1yi += axisn;
 
-    mul(axisn, &((struct BigInteger*)axis)[i]);                                   //  axisn *= axis[i] (axisn^2);
-    add(sxi2yi, axisn);                                                           //  sxi2yi += axisn;
+    mul(axisn, &((struct BigInteger*)axis)[i], m);                                //  axisn *= axis[i] (axisn^2);
+    add(sxi2yi, axisn, m);                                                        //  sxi2yi += axisn;
   }                                                                               //}
 
   BImemcpy(axisn, 1);                                                             //axisn = 1;
-  add(three, axisn);                                                              // three++;
-  add(three, axisn);                                                              // three++;
+  add(three, axisn, m);                                                           // three++;
+  add(three, axisn, m);                                                           // three++;
 
   //build equations                                                               ////build equations
   //equation 1                                                                    ////equation 1
@@ -1344,15 +1407,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate x-factor on eq2                                                     ////eliminate x-factor on eq2
   gsignum(&eq1[0], &eq2[0], f1);                                                  //f1 = gsignum(eq1[0], eq2[0]);
   memcpy(f3, &eq1[0], sizeof(struct BigInteger));                                 //f3 = eq1[0];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq2[0], sizeof(struct BigInteger));                                 //f2 = eq2[0];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq2);                                                                //gaussM(f1, eq2);
-  gaussM(f2, eq1);                                                                //gaussM(f2, eq1);
-  gaussS(eq2, eq1);                                                               //gaussS(eq2, eq1);
+  gaussM(f1, eq2, m);                                                             //gaussM(f1, eq2);
+  gaussM(f2, eq1, m);                                                             //gaussM(f2, eq1);
+  gaussS(eq2, eq1, m);                                                            //gaussS(eq2, eq1);
 
   _log("------------- x on eq2 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1379,15 +1442,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate x-factor on eq3                                                     ////eliminate x-factor on eq3
   gsignum(&eq1[0], &eq3[0], f1);                                                  //f1 = gsignum(eq1[0], eq3[0]);
   memcpy(f3, &eq1[0], sizeof(struct BigInteger));                                 //f3 = eq1[0];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq3[0], sizeof(struct BigInteger));                                 //f2 = eq3[0];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq3);                                                                //gaussM(f1, eq3);
-  gaussM(f2, eq1);                                                                //gaussM(f2, eq1);
-  gaussS(eq3, eq1);                                                               //gaussS(eq3, eq1);
+  gaussM(f1, eq3, m);                                                             //gaussM(f1, eq3);
+  gaussM(f2, eq1, m);                                                             //gaussM(f2, eq1);
+  gaussS(eq3, eq1, m);                                                            //gaussS(eq3, eq1);
 
   _log("------------- x on eq3 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1414,15 +1477,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate y-factor on eq1                                                     ////eliminate y-factor on eq1
   gsignum(&eq2[1], &eq1[1], f1);                                                  //f1 = gsignum(eq2[1], eq1[1]);
   memcpy(f3, &eq2[1], sizeof(struct BigInteger));                                 //f3 = eq2[1];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq1[1], sizeof(struct BigInteger));                                 //f2 = eq1[1];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq1);                                                                //gaussM(f1, eq1);
-  gaussM(f2, eq2);                                                                //gaussM(f2, eq2);
-  gaussS(eq1, eq2);                                                               //gaussS(eq1, eq2);
+  gaussM(f1, eq1, m);                                                             //gaussM(f1, eq1);
+  gaussM(f2, eq2, m);                                                             //gaussM(f2, eq2);
+  gaussS(eq1, eq2, m);                                                            //gaussS(eq1, eq2);
 
   _log("------------- y on eq1 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1449,15 +1512,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate y-factor on eq3                                                     ////eliminate y-factor on eq3
   gsignum(&eq2[1], &eq3[1], f1);                                                  //f1 = gsignum(eq2[1], eq3[1]);
   memcpy(f3, &eq2[1], sizeof(struct BigInteger));                                 //f3 = eq2[1];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq3[1], sizeof(struct BigInteger));                                 //f2 = eq3[1];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq3);                                                                //gaussM(f1, eq3);
-  gaussM(f2, eq2);                                                                //gaussM(f2, eq2);
-  gaussS(eq3, eq2);                                                               //gaussS(eq3, eq2);
+  gaussM(f1, eq3, m);                                                             //gaussM(f1, eq3);
+  gaussM(f2, eq2, m);                                                             //gaussM(f2, eq2);
+  gaussS(eq3, eq2, m);                                                            //gaussS(eq3, eq2);
 
   _log("------------- y on eq3 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1484,15 +1547,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate z-factor on eq1                                                     ////eliminate z-factor on eq1
   gsignum(&eq3[2], &eq1[2], f1);                                                  //f1 = gsignum(eq3[2], eq1[2]);
   memcpy(f3, &eq3[2], sizeof(struct BigInteger));                                 //f3 = eq3[2];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq1[2], sizeof(struct BigInteger));                                 //f2 = eq1[2];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq1);                                                                //gaussM(f1, eq1);
-  gaussM(f2, eq3);                                                                //gaussM(f2, eq3);
-  gaussS(eq1, eq3);                                                               //gaussS(eq1, eq3);
+  gaussM(f1, eq1, m);                                                             //gaussM(f1, eq1);
+  gaussM(f2, eq3, m);                                                             //gaussM(f2, eq3);
+  gaussS(eq1, eq3, m);                                                            //gaussS(eq1, eq3);
 
   _log("------------- z on eq1 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1519,15 +1582,15 @@ void regression(void* data, void* axis, void* dif) {
   //eliminate z-factor on eq2                                                     ////eliminate z-factor on eq2
   gsignum(&eq3[2], &eq2[2], f1);                                                  //f1 = gsignum(eq3[2], eq2[2]);
   memcpy(f3, &eq3[2], sizeof(struct BigInteger));                                 //f3 = eq3[2];
-  absolute(f3);                                                                   //f3 = absolute(f3);
-  mul(f1, f3);                                                                    //f1 *= f3;
+  absolute(f3, m);                                                                //f3 = absolute(f3);
+  mul(f1, f3, m);                                                                 //f1 *= f3;
 
   memcpy(f2, &eq2[2], sizeof(struct BigInteger));                                 //f2 = eq2[2];
-  absolute(f2);                                                                   //f2 = absolute(f2);
+  absolute(f2, m);                                                                //f2 = absolute(f2);
 
-  gaussM(f1, eq2);                                                                //gaussM(f1, eq2);
-  gaussM(f2, eq3);                                                                //gaussM(f2, eq3);
-  gaussS(eq2, eq3);                                                               //gaussS(eq2, eq3);
+  gaussM(f1, eq2, m);                                                             //gaussM(f1, eq2);
+  gaussM(f2, eq3, m);                                                             //gaussM(f2, eq3);
+  gaussS(eq2, eq3, m);                                                            //gaussS(eq2, eq3);
 
   _log("------------- z on eq2 -------------", INFORMATIONAL);                    ////Display header
   toString(&eq1[0], st1);                                                         ///*
@@ -1555,9 +1618,9 @@ void regression(void* data, void* axis, void* dif) {
   memcpy(b, &eq2[3], sizeof(struct BigInteger));                                  //b = eq2[3];
   memcpy(a, &eq3[3], sizeof(struct BigInteger));                                  //a = eq3[3];
 
-  dvs(c, &eq1[0]);                                                                //c /= eq1[0];
-  dvs(b, &eq2[1]);                                                                //b /= eq2[1];
-  dvs(a, &eq3[2]);                                                                //a /= eq3[2];
+  dvs(c, &eq1[0], m);                                                             //c /= eq1[0];
+  dvs(b, &eq2[1], m);                                                             //b /= eq2[1];
+  dvs(a, &eq3[2], m);                                                             //a /= eq3[2];
 
   toString(a, st1);                                                               ///*
   toString(b, st2);                                                               // * Display a, b, c
@@ -1595,10 +1658,10 @@ void regression(void* data, void* axis, void* dif) {
 }
 
 //Return absolute value for n
-void absolute(void* n) {
-  struct BigInteger* z = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* m = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int* r = (int*)malloc(sizeof(int));
+void absolute(void* n, void* y) {
+  struct BigInteger* z = malloc(sizeof(struct BigInteger));
+  struct BigInteger* m = malloc(sizeof(struct BigInteger));
+  int* r = malloc(sizeof(int));
 
   int mmi = 3;
   int mm;
@@ -1614,7 +1677,7 @@ void absolute(void* n) {
   equals(n, z, r);    ////¿n < z? => r
 
   if (*r == 2)        //if(n < z)
-    mul(n, m);        //  n *= m;
+    mul(n, m, y);     //  n *= m;
 
   free(z);
   free(m);
@@ -1623,11 +1686,11 @@ void absolute(void* n) {
 
 //Return signum distinctive
 void gsignum(void* a, void* b, void* res) {
-  struct BigInteger* z = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* o = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* m = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int* k1 = (int*)malloc(sizeof(int));
-  int* k2 = (int*)malloc(sizeof(int));
+  struct BigInteger* z = malloc(sizeof(struct BigInteger));
+  struct BigInteger* o = malloc(sizeof(struct BigInteger));
+  struct BigInteger* m = malloc(sizeof(struct BigInteger));
+  int* k1 = malloc(sizeof(int));
+  int* k2 = malloc(sizeof(int));
 
   int mmi = 5;
   int mm;
@@ -1660,28 +1723,28 @@ void gsignum(void* a, void* b, void* res) {
 }
 
 //Performs factor * equation for each equation[i]
-void gaussM(void* factor, void* equation) {
+void gaussM(void* factor, void* equation, void* m) {
   int i = 0;
 
   for (i = 0; i < 4; i++)                               //for (i = 0; i < 3; i++) 
-    mul(&((struct BigInteger*)equation)[i], factor);    //  equation[i] *= factor;
+    mul(&((struct BigInteger*)equation)[i], factor, m); //  equation[i] *= factor;
 }
 
 //Correlatively performs equation1[i] += equation2[i]
-void gaussS(void* equation1, void* equation2) {
+void gaussS(void* equation1, void* equation2, void* m) {
   int i = 0;
 
   for (i = 0; i < 4; i++)                                                             //for (i = 0; i < 3; i++) 
-    add(&((struct BigInteger*)equation1)[i], &((struct BigInteger*)equation2)[i]);    //  equation1[i] += equation2[i];
+    add(&((struct BigInteger*)equation1)[i], &((struct BigInteger*)equation2)[i], m); //  equation1[i] += equation2[i];
 }
 
 //Solves a 2-degree equation (ax^2 + bx + c = 0)
-void solve(void* dif, void* sols) {
-  struct BigInteger* min = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* two = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* four = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b2 = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* zro = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+void solve(void* dif, void* sols, int check, void* m) {
+  struct BigInteger* min =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* two =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* four = malloc(sizeof(struct BigInteger));
+  struct BigInteger* b2 =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* zro =  malloc(sizeof(struct BigInteger));
 
   int mmi = 5;
   int mm;
@@ -1694,49 +1757,46 @@ void solve(void* dif, void* sols) {
 
   //initialize data                                                               ////initialize data
   BImemcpy(min, -1);                                                              //min = -1;
-  BImemcpy(two, 1);                                                               //two = 1;
+  BImemcpy(two, 2);                                                               //two = 2;
   BImemcpy(zro, 0);                                                               //zro = 0;
-  add(two, two);                                                                  //two++; (two = 2)
-
-  memcpy(four, two, sizeof(struct BigInteger));                                   //four = two;
-  add(four, four);                                                                //four = four + four; (four = 4)
+  BImemcpy(four, 4);                                                              //four = 4;
 
   memcpy(b2, &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));           //b2 = b;
 
 
   //b^2                                                                           ////b^2
-  bipow(b2, 2);                                                                   //  pow(b2, 2);
+  bipow(b2, 2, m);                                                                //  pow(b2, 2);
 
   //4ac                                                                           ////4ac
-  mul(four, &((struct BigInteger*)dif)[0]);                                       //  four *= a;
-  mul(four, &((struct BigInteger*)dif)[2]);                                       //  four *= c;
+  mul(four, &((struct BigInteger*)dif)[0], m);                                    //  four *= a;
+  mul(four, &((struct BigInteger*)dif)[2], m);                                    //  four *= c;
 
   //b^2 - 4ac                                                                     ////b^2 - 4ac
-  sub(b2, four);                                                                  //  b2 -= four;
+  sub(b2, four, m);                                                               //  b2 -= four;
 
   //sqrt(b^2 - 4ac)                                                               ////sqrt(b^2 - 4ac)
-  nqrt(b2, 2);                                                                    //  b2 = sqrt(min);
+  nqrt(b2, 2, m);                                                                 //  b2 = sqrt(min);
 
   //2a                                                                            ////2a
-  mul(two, &((struct BigInteger*)dif)[0]);                                        //  two *= a;
+  mul(two, &((struct BigInteger*)dif)[0], m);                                     //  two *= a;
 
   //-b                                                                            ////-b
-  mul(min, &((struct BigInteger*)dif)[1]);                                        //  min *= b;
+  mul(min, &((struct BigInteger*)dif)[1], m);                                     //  min *= b;
 
   memcpy(&((struct BigInteger*)sols)[0], min, sizeof(struct BigInteger));         //sols[0] = min;
   memcpy(&((struct BigInteger*)sols)[1], min, sizeof(struct BigInteger));         //sols[1] = min;
 
   //-b + sqrt(b^2 - 4ac)                                                          ////-b + sqrt(b^2 - 4ac)
-  add(&((struct BigInteger*)sols)[0], b2);                                        //  sols[0] += b2;
+  add(&((struct BigInteger*)sols)[0], b2, m);                                     //  sols[0] += b2;
 
   //-b - sqrt(b^2 - 4ac)                                                          ////-b - sqrt(b^2 - 4ac)
-  sub(&((struct BigInteger*)sols)[1], b2);                                        //  sols[1] -= b2;
+  sub(&((struct BigInteger*)sols)[1], b2, m);                                     //  sols[1] -= b2;
 
   //(-b + sqrt(b^2 - 4ac)) / 2a                                                   ////(-b + sqrt(b^2 - 4ac)) / 2a
-  dvs(&((struct BigInteger*)sols)[0], two);                                       //  sols[0] /= two;
+  dvs(&((struct BigInteger*)sols)[0], two, m);                                    //  sols[0] /= two;
 
   //(-b - sqrt(b^2 - 4ac)) / 2a                                                   ////(-b - sqrt(b^2 - 4ac)) / 2a
-  dvs(&((struct BigInteger*)sols)[1], two);                                       //  sols[1] /= two;
+  dvs(&((struct BigInteger*)sols)[1], two, m);                                    //  sols[1] /= two;
 
   equals(&((struct BigInteger*)sols)[0], zro, &ret);
 
@@ -1746,27 +1806,28 @@ void solve(void* dif, void* sols) {
   free(b2);
   free(zro);
 
-  if (ret == 0 || ret == 2) {
-    //x1 solution <= 0
-    _log("A solution reached 0 or below. Exiting thread", INFORMATIONAL);
-    exit(0);
+  if (check > 0) {
+    if (ret == 0 || ret == 2) {
+      //x1 solution <= 0
+      _log("A solution reached 0 or below. Exiting thread", ERROR);
+      exit(0);
+    }
   }
 }
 
 //Calculate the distance of the CPC based on David Sole's CPC Theoreme
-void distance(void* base, int z, int y, int s, void* res) {
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* hun = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* tho = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* biz = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* biy = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* bis = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  char* chz = (char*)malloc(sizeof(char) * 2);
-  char* chy = (char*)malloc(sizeof(char) * 2);
-  char* chs = (char*)malloc(sizeof(char) * 2);
-  char* cmp;
+void distance(void* base, int z, int y, int s, void* res, void* m) {
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* hun = malloc(sizeof(struct BigInteger));
+  struct BigInteger* tho = malloc(sizeof(struct BigInteger));
+  struct BigInteger* biz = malloc(sizeof(struct BigInteger));
+  struct BigInteger* biy = malloc(sizeof(struct BigInteger));
+  struct BigInteger* bis = malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp = malloc(sizeof(struct BigInteger));
+  char* chz = malloc(sizeof(char) * 2);
+  char* chy = malloc(sizeof(char) * 2);
+  char* chs = malloc(sizeof(char) * 2);
 
   int mmi = 11;
   int mm;
@@ -1782,9 +1843,7 @@ void distance(void* base, int z, int y, int s, void* res) {
   BImemcpy(hun, 100);                                                             //hun = 100;
   BImemcpy(tho, 100);                                                             //tho = 100;
 
-  iniStr(&cmp);
-
-  mul(tho, ten);                                                                  //tho *= 10; (1000)
+  mul(tho, ten, m);                                                               //tho *= 10; (1000)
 
   //convert int to BI                                                             ////convert int to BI
   //z                                                                             ////z
@@ -1805,46 +1864,25 @@ void distance(void* base, int z, int y, int s, void* res) {
 
   //b increase: 1000Z                                                             ////b increase: 10Z
   memcpy(&((struct BigInteger*)res)[1], biz, sizeof(struct BigInteger));          //res[1] = biz;
-  mul(&((struct BigInteger*)res)[1], tho);                                        //res[1] *= tho;
+  mul(&((struct BigInteger*)res)[1], tho, m);                                     //res[1] *= tho;
 
   //c increase: ((Y * 100) - 1000) - (1000 * (Z - S))                             ////c increase: ((Y * 100) - 1000) - (1000 * (Z - S))
   //  Z - S                                                                       ////  Z - S
   memcpy(tmp, biz, sizeof(struct BigInteger));                                    //tmp = biz;
-  sub(tmp, bis);                                                                  //tmp -= bis;
-
-  toString(biz, cmp);
-  _log("Z = %s", INFORMATIONAL, cmp);
-
-  toString(bis, cmp);
-  _log("S = %s", INFORMATIONAL, cmp);
-
-  toString(tmp, cmp);
-  _log("Z - S = %s", INFORMATIONAL, cmp);
+  sub(tmp, bis, m);                                                               //tmp -= bis;
 
   //  1000 * (Z - S)                                                              ////  1000 * (Z - S)
-  mul(tmp, tho);                                                                  //tmp *= tho; 
-
-  toString(tmp, cmp);
-  _log("1000 * (Z - S) = %s", INFORMATIONAL, cmp);
+  mul(tmp, tho, m);                                                               //tmp *= tho; 
 
   //  Y * 100                                                                     ////  Y * 100
   memcpy(&((struct BigInteger*)res)[2], biy, sizeof(struct BigInteger));          //res[2] = biy;
-  mul(&((struct BigInteger*)res)[2], hun);                                        //res[2] *= hun
-
-  toString(&((struct BigInteger*)res)[2], cmp);
-  _log("Y * 100 = %s", INFORMATIONAL, cmp);
+  mul(&((struct BigInteger*)res)[2], hun, m);                                     //res[2] *= hun
 
   //  (Y * 100) - 1000                                                            ////  (Y * 100) - 1000
-  sub(&((struct BigInteger*)res)[2], tho);                                        //res[2] -= tho;
-
-  toString(&((struct BigInteger*)res)[2], cmp);
-  _log("(Y * 100) - 1000 = %s", INFORMATIONAL, cmp);
+  sub(&((struct BigInteger*)res)[2], tho, m);                                     //res[2] -= tho;
 
   //  ((Y * 100) - 1000) - (1000 * (Z - S))                                       ////  ((Y * 100) - 1000) - (1000 * (Z - S))
-  sub(&((struct BigInteger*)res)[2], tmp);                                        //res[2] -= tmp;
-
-  toString(&((struct BigInteger*)res)[2], cmp);
-  _log("((Y * 100) - 1000) - (1000 * (Z - S)) = %s", INFORMATIONAL, cmp);
+  sub(&((struct BigInteger*)res)[2], tmp, m);                                     //res[2] -= tmp;
 
   free(one);
   free(ten);
@@ -1860,16 +1898,15 @@ void distance(void* base, int z, int y, int s, void* res) {
 }
 
 //Check if given solutions fits for a * b = num, as initial x1 and x2 are axis-based data
-int checkSolution(void* factor, int ending, void* num) {
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* fac = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* bending = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int* pres = (int*)malloc(sizeof(int));
-  char* ch = (char*)malloc(sizeof(char) * 2);
-  char* str;
+int checkSolution(void* factor, int* ending, void* num, void* m, int* arrp) {
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* fac = malloc(sizeof(struct BigInteger));
+  struct BigInteger* a =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* b =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* bending = malloc(sizeof(struct BigInteger));
+  int* pres = malloc(sizeof(int));
+  char* ch =  malloc(sizeof(char) * 2);
   int res;
 
   int mmi = 8;
@@ -1880,32 +1917,51 @@ int checkSolution(void* factor, int ending, void* num) {
   if (mm < 0)
     exit(-405);
 
-  iniStr(&str);
+  //First number                                                                  ////First number
+  *arrp = 0;                                                                      //arrp = 0;
 
   //inis                                                                          ////inis
   BImemcpy(one, 1);                                                               //one = 1;
   BImemcpy(ten, 10);                                                              //ten = 10;
 
   //conversion
-  _itoa_s(ending, ch, 2, 10);                                                     //ending.toString();
-  newBI(bending, ch, 0);                                                          //ending.toBI();
-
+  _itoa_s(ending[0], ch, 2, 10);                                                  //ending[0].toString();
+  newBI(bending, ch, 0);                                                          //ending[0].toBI();
 
   memcpy(fac, factor, sizeof(struct BigInteger));                                 //fac = factor;
   memcpy(b, num, sizeof(struct BigInteger));                                      //b = num;
 
-  sub(fac, one);                                                                  //--fac;
-  mul(fac, ten);                                                                  //fac *= 10;
-  add(fac, bending);                                                              //fac += ending;
+  sub(fac, one, m);                                                               //--fac;
+  mul(fac, ten, m);                                                               //fac *= 10;
+  add(fac, bending, m);                                                           //fac += ending;
   memcpy(a, fac, sizeof(struct BigInteger));                                      //a = fac;
 
-  toString(fac, str);
-  _log("factor: %s", INFORMATIONAL, str);
-
-  dvs(b, fac);                                                                    //b /= fac;
-  mul(b, a);                                                                      //b *= a;
+  dvs(b, fac, m);                                                                 //b /= fac;
+  mul(b, a, m);                                                                   //b *= a;
 
   equals(b, num, pres);                                                           //pres = b.equals(num);
+
+  if (*pres != 0) {                                                               //if (*pres != 0) {
+    //first value did not satisfy the equation. Try second one                    //  //first value did not satisfy the equation. Try second one
+    *arrp = 1;                                                                    //  arrp = 1;
+
+    //conversion                                                                  //  //conversion
+    _itoa_s(ending[1], ch, 2, 10);                                                //  ending[1].toString();
+    newBI(bending, ch, 0);                                                        //  ending[1].toBI();
+
+    memcpy(fac, factor, sizeof(struct BigInteger));                               //  fac = factor;
+    memcpy(b, num, sizeof(struct BigInteger));                                    //  b = num;
+
+    sub(fac, one, m);                                                             //  --fac;
+    mul(fac, ten, m);                                                             //  fac *= 10;
+    add(fac, bending, m);                                                         //  fac += ending;
+    memcpy(a, fac, sizeof(struct BigInteger));                                    //  a = fac;
+
+    dvs(b, fac, m);                                                               //  b /= fac;
+    mul(b, a, m);                                                                 //  b *= a;
+
+    equals(b, num, pres);                                                         //  pres = b.equals(num);
+  }                                                                               //}
 
   memcpy(&res, pres, sizeof(int));
 
@@ -1922,17 +1978,17 @@ int checkSolution(void* factor, int ending, void* num) {
 }
 
 //Makes a printable String for the equation solution based on axis-data based
-char* printSolution(void* factor, int ending, void* num) {
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ten = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* fac = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* bending = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  char* ret = (char*)malloc(sizeof(char) * 5000);
-  char* xt1 = (char*)malloc(sizeof(char) * 5000);
-  char* xt2 = (char*)malloc(sizeof(char) * 5000);
-  char* ch = (char*)malloc(sizeof(char) * 2);
+char* printSolution(void* factor, int* ending, void* num, void* m, int* arrp) {
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* fac = malloc(sizeof(struct BigInteger));
+  struct BigInteger* a =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* b =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* bending = malloc(sizeof(struct BigInteger));
+  char* ret = malloc(sizeof(char) * 5000);
+  char* xt1 = malloc(sizeof(char) * 5000);
+  char* xt2 = malloc(sizeof(char) * 5000);
+  char* ch =  malloc(sizeof(char) * 2);
 
   int mmi = 10;
   int mm;
@@ -1947,18 +2003,18 @@ char* printSolution(void* factor, int ending, void* num) {
   BImemcpy(ten, 10);                                                              //ten = 10;
 
   //conversion
-  _itoa_s(ending, ch, 2, 10);                                                     //ending.toString();
-  newBI(bending, ch, 0);                                                          //ending.toBI();
+  _itoa_s(ending[*arrp], ch, 2, 10);                                              //ending[arrp].toString();
+  newBI(bending, ch, 0);                                                          //ending[arrp].toBI();
 
 
   memcpy(fac, factor, sizeof(struct BigInteger));                                 //fac = factor;
   memcpy(b, num, sizeof(struct BigInteger));                                      //b = num;
 
-  sub(fac, one);                                                                  //--fac;
-  mul(fac, ten);                                                                  //fac *= 10;
-  add(fac, bending);                                                              //fac += ending;
+  sub(fac, one, m);                                                               //--fac;
+  mul(fac, ten, m);                                                               //fac *= 10;
+  add(fac, bending, m);                                                           //fac += ending;
   memcpy(a, fac, sizeof(struct BigInteger));                                      //a = fac;
-  dvs(b, fac);                                                                    //b /= fac;
+  dvs(b, fac, m);                                                                 //b /= fac;
 
   toString(a, xt1);
   toString(b, xt2);
@@ -1977,12 +2033,554 @@ char* printSolution(void* factor, int ending, void* num) {
   return ret;
 }
 
+//Modifies dif to get the lower limit, solving inequation b^2 < 4ac
+void lowerLimit(void* dif, void* dist, void* m) {
+  /*
+   * "a" is a constant, we'll name it "k"
+   * 
+   * "b" will depend on "m + nz" formula, on which:
+   *    p = dif[1] ("b" value from initial equation)
+   *    q = dist[1] (increment on "b" for each "z" value)
+   * 
+   * so, "b = dif[1] + dist[1] * z"
+   * 
+   * "c" will depend on "-o -pz" formula, on which:
+   *    o = dif[2] ("c" value from initial equation)
+   *    p = dist[2] (decrement on "c" for each "z" value)
+   * 
+   * so, "c = dif[2] + dist[2] * z" (as both dif and dist are negative we can omit the sign)
+   * 
+   * 
+   * To solve the inequation, first we make it an equation
+   * 
+   *    b^2 = 4ac
+   * 
+   * Then, replace "a", "b", and "c" for their formulas
+   * 
+   *    (dif[1] + dist[1] * z)^2 = 4 * (k) * (dif[2] + dist[2] * z);
+   * 
+   * We can simplfy 4 * k => q (also contract the "*" markers to make it easier
+   * 
+   *    (dif[1] + dist[1]z)^2 = q * (dif[2] + dist[2]z);
+   * 
+   * Now, expand both sides
+   * 
+   *    dif[1]^2 + dist[1]^2z^2 + 2dif[1]dist[1]z = qdif[2] + qdist[2]z;
+   * 
+   * We have a 2nd-degree equation. Arrange the things:
+   * 
+   *    dif[1]^2 + dist[1]^2z^2 + 2dif[1]dist[1]z - qdif[2] - qdist[2]z = 0;
+   * 
+   * Now simplify temrs and rearrange:
+   * 
+   *    (dist[1]^2z^2) + (2dif[1]dist[1]z - qdist[2]z) + (dif[1]^2 - qdif[2]) = 0;
+   * 
+   * Make new variables
+   * 
+   *    j = dist[1]^2;
+   *    l = (2 * dif[1] * dist[1]) - (q * dist[2])
+   *    t = (dif[1]^2) - (q * dif[2])
+   * 
+   * Now we have classical equation
+   * 
+   *    jz^2 + lz + t = 0
+   * 
+   * Only left to solve for "z".
+   * 
+   * Exceptional case: this equation may lead to non-real solution.
+   * In this case, both solutions will have a 0 value; then we will search
+   * for the minimum value of (dif[1] + dist[1] * z)^2 by geting its derivative.
+   * 
+   * f(x) = (dif[1] + dist[1] * z)^2;
+   * 
+   * dif[1] = w;
+   * dist[1] = y;
+   * 
+   * f(x) = (w + yz)^2;
+   * f(x) = w^2 + (y^2z^2) + 2wyz;
+   * f'(x) = 2(y^2)z + 2wy;
+   * 
+   * We search for f'(x) = 0, so
+   * 
+   * 2y^2z = -2wy;
+   * z = -2wy / 2(y^2)
+   * 
+   */
+  struct BigInteger* q =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* j =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* l =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* t =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* four = malloc(sizeof(struct BigInteger));
+  struct BigInteger* two =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* aux1 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* aux2 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* vals = malloc(sizeof(struct BigInteger) * 3);
+  struct BigInteger* sols = malloc(sizeof(struct BigInteger) * 2);
+
+  char* st;
+
+  int mmi;
+  int mm = 10;
+
+  mmi = memchk(mm, q, j, four, two, l, aux1, t, aux2, vals, sols);
+
+  if (mmi < 0)
+    exit(-700);
+
+  iniStr(&st);
+
+  BImemcpy(four, 4);                                                              //four = 4;
+  BImemcpy(two, 2);                                                               //two = 2;
+  memcpy(q, &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));            //q = dif[0];
+
+  //Calculate q = 4 * k                                                           ////Calculate q = 4 * k
+  mul(q, four, m);                                                                //q *= four;
+
+  //Calculate j = dist[1]^2                                                       ////Calculate j = dist[1]^2
+  memcpy(j, &((struct BigInteger*)dist)[1], sizeof(struct BigInteger));           //j = dist[1];
+  bipow(j, 2, m);                                                                 //j = j^2;
+
+  //Calculate l = (2 * dif[1] * dist[1]) - (q * dist[2])                          ////Calculate l = (2 * dif[1] * dist[1]) - (q * dist[2])
+  memcpy(l, &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));            //l = dif[1];
+  mul(l, two, m);                                                                 //l *= two;
+  mul(l, &((struct BigInteger*)dist)[1], m);                                      //l *= dist[1];
+
+  memcpy(aux1, q, sizeof(struct BigInteger));                                     //aux1 = q;
+  mul(aux1, &((struct BigInteger*)dist)[2], m);                                   //aux1 *= dist[2];
+
+  sub(l, aux1, m);                                                                //l -= aux1;
+
+  //Calculate t = (dif[1]^2) - (q * dif[2])                                       ////Calculate t = (dif[1]^2) - (q * dif[2])
+  memcpy(t, &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));            //t = dif[1];
+  bipow(t, 2, m);                                                                 //t = t^2;
+  
+  memcpy(aux2, q, sizeof(struct BigInteger));                                     //aux2 = q;
+  mul(aux2, &((struct BigInteger*)dif)[2], m);                                    //aux2 *= dif[2];
+  
+  sub(t, aux2, m);                                                                //t -= aux2;
+
+  //solve the equation                                                            ////solve the equation
+  memcpy(&vals[0], j, sizeof(struct BigInteger));                                 //vals[0] = j;
+  memcpy(&vals[1], l, sizeof(struct BigInteger));                                 //vals[1] = l;
+  memcpy(&vals[2], t, sizeof(struct BigInteger));                                 //vals[2] = t;
+
+  solve(vals, sols, 0, m);                                                        //solve(vals, sols, 0);
+
+  toString(&((struct BigInteger*)sols)[0], st);
+  _log("sol 1: %s", INFORMATIONAL, st);
+
+  toString(&((struct BigInteger*)sols)[1], st);
+  _log("sol 2: %s", INFORMATIONAL, st);
+
+  /*
+   * The optimal value will be on sols[0].
+   * We step back sols[1] steps, as:
+   *   * dif[0] = dif[0];
+   *   * dif[1] = dif[1] + sols[1] * dist[1];
+   *   * dif[2] = dif[2] + sols[1] * dist[2];
+   * 
+   * We use "+" as sols[1] will always be 0 or lower.
+   */
+
+  //dif[1] offset                                                                 ////dif[1] offset
+  memcpy(aux1, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));        //aux1 = sols[0];
+  mul(aux1, &((struct BigInteger*)dist)[1], m);                                   //aux1 *= dist[1];
+  add(&((struct BigInteger*)dif)[1], aux1, m);                                    //dif[1] += aux1;
+
+  //dif[2] offset                                                                 ////dif[2] offset
+  memcpy(aux2, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));        //aux2 = sols[0];
+  mul(aux2, &((struct BigInteger*)dist)[2], m);                                   //aux2 *= dist[2];
+  add(&((struct BigInteger*)dif)[2], aux2, m);                                    //dif[2] += aux;
+
+
+  free(q);
+  free(j);
+  free(four);
+  free(two);
+  free(l);
+  free(aux1);
+  free(t);
+  free(aux2);
+  free(vals);
+  free(sols);
+}
+
+//Gets the hyperbolic jump limit using Bolzano aproximation
+void hbBolzano(void* dif, void* dist, void* bist, void* m) {
+  /*
+   * The consecutive solutions for quadratic equation works on a hpyerbolic-potential way.
+   * So, there's a point on which ceiling values for solutions begin to repeat; at first
+   * they repeat twice, then three times, and each new value have more repetition count.
+   * 
+   * The goal of this function is to get the first repeated value, which means the end of
+   * hyperbolic-potential function.
+   * 
+   * To achieve this, we'll perform Bolzano's approach. That means, we will start increasing
+   * values until we found a repeated one, then get back 10^n-1 values until we don't found 
+   * any repeated values.
+   * 
+   * On this point, we get forward 10^n-1 values to ensuer we're after the hyperbolic-potential
+   * loop, and then perform the same with 10^n-2 values (and so on).
+   */
+  struct BigInteger* offset = malloc(sizeof(struct BigInteger));
+  struct BigInteger* base = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ten = malloc(sizeof(struct BigInteger));
+  struct BigInteger* one = malloc(sizeof(struct BigInteger));
+  struct BigInteger* zero = malloc(sizeof(struct BigInteger));
+  struct BigInteger* aux1 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* aux2 = malloc(sizeof(struct BigInteger));
+  struct BigInteger* fst = malloc(sizeof(struct BigInteger));
+  struct BigInteger* scd = malloc(sizeof(struct BigInteger));
+  struct BigInteger* trd = malloc(sizeof(struct BigInteger));
+  struct BigInteger* sols = malloc(sizeof(struct BigInteger) * 2);
+
+  int* chk = malloc(sizeof(int));
+  int cnt = 0;
+  char* st1;
+
+  int mmi = 12;
+  int mm;
+
+  mm = memchk(mmi, offset, base, ten, one, aux1, aux2, fst, scd, trd, sols, chk, zero);
+
+  if (mm < 0)
+    exit(-450);
+
+  //inits
+  BImemcpy(one, 1);                                                                                         //one = 1;
+  BImemcpy(ten, 10);                                                                                        //ten = 10;
+  BImemcpy(zero, 0);                                                                                        //zero = 0;
+
+  iniStr(&st1);
+
+  *chk = -1;                                                                                                //*chk = -1;
+
+  _log("Bolzano starts", INFORMATIONAL);
+
+  //Get the fisrt value that crosses hb-p part                                                              ////Get the fisrt value that crosses hb-p part
+  memcpy(base, ten, sizeof(struct BigInteger));                                                             //base = ten;
+
+  //We need to get 3 consecutive values to check...                                                         ////We need to get 3 consecutive values to check...
+  while (*chk != 0) {                                                                                       //while (*chk != 0){
+    //copy values to bist                                                                                   //  //copy values to bist
+    memcpy(&((struct BigInteger*)bist)[0], &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));       //  bist[0] = dif[0];
+    memcpy(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));       //  bist[1] = dif[1];
+    memcpy(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dif)[2], sizeof(struct BigInteger));       //  bist[2] = dif[2];
+
+    //FIRST VALUE                                                                                           //  //FIRST VALUE
+    //bist[1] offset                                                                                        //  //bist[1] offset                                                                
+    memcpy(aux1, base, sizeof(struct BigInteger));                                                          //  aux1 = base;
+    mul(aux1, &((struct BigInteger*)dist)[1], m);                                                           //  aux1 *= dist[1];
+    add(&((struct BigInteger*)bist)[1], aux1, m);                                                           //  bist[1] += aux1;
+
+    //bist[2] offset                                                                                        //  //bist[2] offset                                                           
+    memcpy(aux2, base, sizeof(struct BigInteger));                                                          //  aux2 = base;
+    mul(aux2, &((struct BigInteger*)dist)[2], m);                                                           //  aux2 *= dist[2]
+    add(&((struct BigInteger*)bist)[2], aux2, m);                                                           //  bist[2] += aux2;
+
+    //solve equation                                                                                        //  //solve equation
+    solve(bist, sols, 0, m);                                                                                //  solve(bist, sols, 0);
+
+    //Bolzano will be applied on the potential way (sols[0]).                                               //  //Bolzano will be applied on the potential way (sols[0]).
+    memcpy(fst, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                                 //  fst = sols[0];
+
+    //SECOND VALUE                                                                                          //  //SECOND VALUE
+    add(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dist)[1], m);                                 //  bist[1] += dist[1];
+    add(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dist)[2], m);                                 //  bist[2] += dist[2];
+    solve(bist, sols, 0, m);                                                                                //  solve(bist, sols, 0);
+    memcpy(scd, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                                 //  scd = sols[0];
+
+    //THIRD VALUE                                                                                           //  //THIRD VALUE
+    add(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dist)[1], m);                                 //  bist[1] += dist[1];
+    add(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dist)[2], m);                                 //  bist[2] += dist[2];
+    solve(bist, sols, 0, m);                                                                                //  solve(bist, sols, 0);
+    memcpy(trd, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                                 //  trd = sols[0];
+
+    /*                                                                                                      //  /*
+     * Now we compare the values                                                                            //   * Now we compare the values
+     *                                                                                                      //   *
+     * If a == b ==> n, n, ?                                                                                //   * If a == b ==> n, n, ?
+     * If b == c ==> ?, n, n                                                                                //   * If b == c ==> ?, n, n
+     */                                                                                                     //   */
+    equals(fst, scd, chk);                                                                                  //  fst = scd?
+
+    if (*chk == 0) {                                                                                        //  if(fst == scd) {
+      //fst == scd                                                                                          //    //fst == scd
+      toString(base, st1);
+      _log("Bolzano approach: %s", ERROR, st1);
+    } else {                                                                                                //  } else {
+      equals(scd, trd, chk);                                                                                //    scd = trd?
+
+      if (*chk == 0) {                                                                                      //    if(scd == trd) {
+        //scd == trd                                                                                        //      //scd == trd
+        toString(base, st1);
+        _log("Bolzano approach: %s", ERROR, st1);
+      } else {                                                                                              //    } else {
+        //fst != scd != trd; increase base                                                                  //      //fst != scd != trd; increase base
+        mul(base, ten, m);                                                                                  //      base *= ten;
+      }                                                                                                     //    }
+    }                                                                                                       //  }
+  }                                                                                                         //}
+
+  /*                                                                                                        ///*
+   * Once got on this point, we have [base / 10 < n < base].                                                // * Once got on this point, we have [base / 10 < n < base].
+   * We will get a more accurated range [base / 10 < n < (base / 10) + k * (base / 100)]                    // * We will get a more accurated range [base / 10 < n < (base / 10) + k * (base / 100)]
+   *                                                                                                        // * 
+   * In other words, we will keep subtracting base / 10 from base until there's no equal values,            // * In other words, we will keep subtracting base / 10 from base until there's no equal values,
+   * then add base / 10 to base.                                                                            // * then add base / 10 to base.
+   */                                                                                                       // */
+  memcpy(offset, base, sizeof(struct BigInteger));                                                          //base = offset;
+
+  //reduce the base                                                                                         ////reduce the base
+  dvs(base, ten, m);                                                                                        //base /= ten;
+  sub(offset, base, m);                                                                                     //offset -= base;
+
+  while (cnt != 9){                                                                                         //while (cnt != 9) {
+    //restart counters                                                                                      //  //restart counters
+    *chk = 0;                                                                                               //  *chk = 0;
+    cnt = 0;                                                                                                //  cnt = 0;
+
+    while (*chk == 0) {                                                                                     //  while (*chk == 0) {
+      //copy values to bist                                                                                       //copy values to bist
+      memcpy(&((struct BigInteger*)bist)[0], &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));     //    bist[0] = dif[0];
+      memcpy(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));     //    bist[1] = dif[1];
+      memcpy(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dif)[2], sizeof(struct BigInteger));     //    bist[2] = dif[2]; 
+
+      //FIRST VALUE                                                                                         //    //FIRST VALUE
+      //bist[1] offset                                                                                      //    //bist[1] offset     
+      memcpy(aux1, offset, sizeof(struct BigInteger));                                                      //    aux1 = base;
+      mul(aux1, &((struct BigInteger*)dist)[1], m);                                                         //    aux1 *= dist[1];
+      add(&((struct BigInteger*)bist)[1], aux1, m);                                                         //    bist[1] += aux1;
+
+      //bist[2] offset                                                                                      //    //bist[2] offset     
+      memcpy(aux2, offset, sizeof(struct BigInteger));                                                      //    aux2 = base;
+      mul(aux2, &((struct BigInteger*)dist)[2], m);                                                         //    aux2 *= dist[2]
+      add(&((struct BigInteger*)bist)[2], aux2, m);                                                         //    bist[2] += aux2;
+
+      //solve equation                                                                                      //    //solve equation
+      solve(bist, sols, 0, m);                                                                              //    solve(bist, sols, 0);
+
+      memcpy(fst, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                               //    fst = sols[0];
+
+      //SECOND VALUE                                                                                        //    //SECOND VALUE
+      add(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dist)[1], m);                               //    bist[1] += dist[1];
+      add(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dist)[2], m);                               //    bist[2] += dist[2];
+      solve(bist, sols, 0, m);                                                                              //    solve(bist, sols, 0);
+      memcpy(scd, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                               //    scd = sols[0];
+
+      //THIRD VALUE                                                                                         //    //THIRD VALUE
+      add(&((struct BigInteger*)bist)[1], &((struct BigInteger*)dist)[1], m);                               //    bist[1] += dist[1];
+      add(&((struct BigInteger*)bist)[2], &((struct BigInteger*)dist)[2], m);                               //    bist[2] += dist[2];
+      solve(bist, sols, 0, m);                                                                              //    solve(bist, sols, 0);
+      memcpy(trd, &((struct BigInteger*)sols)[0], sizeof(struct BigInteger));                               //    trd = sols[0];
+
+      /*                                                                                                    //    /*
+       * Now we compare the values                                                                          //     * Now we compare the values
+       *                                                                                                    //     *
+       * If a == b ==> n, n, ?                                                                              //     * If a == b ==> n, n, ?
+       * If b == c ==> ?, n, n                                                                              //     * If b == c ==> ?, n, n
+       *                                                                                                    //     *
+       * We keed decreasing until there're not equal values                                                 //     * We keed decreasing until there're not equal values
+       */                                                                                                   //     */
+      equals(fst, scd, chk);                                                                                //    fst == scd?
+
+      if (*chk == 0) {                                                                                      //    if(fst == scd) {
+        //fst == scd; decrease base                                                                         //      //fst == scd; decrease base
+        sub(offset, base, m);                                                                               //      offset -= base;
+      } else {                                                                                              //    } else {
+        equals(scd, trd, chk);                                                                              //      scd == trd?
+          
+        if (*chk == 0) {                                                                                    //      if(scd == trd) {
+          //scd == trd; decrease base                                                                       //        //scd == trd; decrease base
+          sub(offset, base, m);                                                                             //        offset -= base;
+        } else {                                                                                            //      } else {
+          //fst != scd != trd; got it                                                                       //        //fst != scd != trd; got it
+          toString(offset, st1);                                                                            
+          _log("Bolzano approach break: %s", ERROR, st1);
+        }                                                                                                   //      }
+      }                                                                                                     //    }
+
+      //try count                                                                                           //    //try count
+      ++cnt;                                                                                                //    ++cnt;
+
+      //if we tried 9 times and no break found, we have the value                                           //    //if we tried 9 times and no break found, we have the value
+      if (cnt == 9) {                                                                                       //    if (cnt == 9) {
+        *chk = 0;                                                                                           //      *chk = 0;
+      }                                                                                                     //    }
+    }                                                                                                       //  }
+
+    //jump to next value to ensure range                                                                    //  //jump to next value to ensure range
+    add(offset, base, m);                                                                                   //  offset += base;
+    dvs(base, ten, m);                                                                                      //  base /= ten;
+
+    //restart offset                                                                                        //  //restart offset
+    sub(offset, base, m);                                                                                   //  offset -= base;
+
+    equals(base, zero, chk);                                                                                //  base == zero?
+
+    //if base = one, we're done                                                                             //  //if base = one, we're done
+    if (*chk == 0) {                                                                                        //  if (*chk == 0) {
+      cnt = 9;                                                                                              //    cnt = 9;
+    }                                                                                                       //  }
+  }                                                                                                         //}
+
+  toString(offset, st1);
+  _log("Hyperbolic-Potential limit (axis): %s", ERROR, st1);
+
+  toString(trd, st1);
+  _log("Hyperbolic-Potential limit (value): %s", ERROR, st1);
+
+  add(trd, offset, m);
+  toString(trd, st1);
+  _log("Theorical maximum iterations: %s", ERROR, st1);
+
+
+  free(offset);
+  free(base);
+  free(ten);
+  free(one);
+  free(zero);
+  free(aux1);
+  free(aux2);
+  free(fst);
+  free(scd);
+  free(trd);
+  free(sols);
+  free(chk);
+  free(st1);
+}
+
+//dumps a file and starts cuda engine
+static void cudaMode(void* dif, void* dist, int* arr, void* num) {
+  FILE* f;
+  int fl;
+  char* st1;
+  char* st2;
+  char* st3;
+  char* st4;
+  char* st5;
+  char* st6;
+  char* st7;
+  struct BigInteger* ha = malloc(sizeof(struct BigInteger));
+  struct BigInteger* hb = malloc(sizeof(struct BigInteger));
+  struct BigInteger* hc = malloc(sizeof(struct BigInteger));
+  struct BigInteger* hd = malloc(sizeof(struct BigInteger));
+  struct BigInteger* he = malloc(sizeof(struct BigInteger));
+  struct BigInteger* hf = malloc(sizeof(struct BigInteger));
+  struct BigInteger* min = malloc(sizeof(struct BigInteger));
+  struct BigInteger* two = malloc(sizeof(struct BigInteger));
+  struct BigInteger* four = malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp = malloc(sizeof(struct BigInteger));
+  struct memory* m = malloc(getMemorySize());
+
+  iniStr(&st1);
+  iniStr(&st2);
+  iniStr(&st3);
+  iniStr(&st4);
+  iniStr(&st5);
+  iniStr(&st6);
+  iniStr(&st7);
+  init(m);
+
+  //dif[0] = k
+  //dif[1] = p
+  //dif[2] = r
+
+  //dist[0] = -
+  //dist[1] = q
+  //dist[2] = s
+
+  BImemcpy(min, -1);
+  BImemcpy(two, 2);
+  BImemcpy(four, 4);
+
+  //ha = p
+  memcpy(ha, &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));
+
+  //hb = -q
+  memcpy(hb, &((struct BigInteger*)dist)[1], sizeof(struct BigInteger));
+  mul(hb, min, m);
+
+  //hc = q^2
+  memcpy(hc, &((struct BigInteger*)dist)[1], sizeof(struct BigInteger));
+  bipow(hc, 2, m);
+
+  //hd = 2pq + 4ks
+  memcpy(hd, &((struct BigInteger*)dist)[1], sizeof(struct BigInteger));
+  mul(hd, &((struct BigInteger*)dif)[1], m);
+  mul(hd, two, m); //2pq
+  memcpy(tmp, &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));
+  mul(tmp, four, m);
+  mul(tmp, &((struct BigInteger*)dist)[2], m);
+  mul(tmp, min, m); //4ks
+  add(hd, tmp, m); //2pq + 4ks
+
+  //he = p^2 - 4kr
+  memcpy(he, &((struct BigInteger*)dif)[1], sizeof(struct BigInteger));
+  bipow(he, 2, m); //p^2
+
+  memcpy(tmp, &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));
+  mul(tmp, four, m);
+  mul(tmp, &((struct BigInteger*)dif)[2], m); //4kr
+  
+  sub(he, tmp, m); //p^2 - 4kr
+
+  //hf = 2k
+  memcpy(hf, &((struct BigInteger*)dif)[0], sizeof(struct BigInteger));
+  mul(hf, two, m);
+
+  /*toString(&((struct BigInteger*)dif)[0], st1);
+  toString(&((struct BigInteger*)dif)[1], st2);
+  toString(&((struct BigInteger*)dif)[2], st3);
+  toString(&((struct BigInteger*)dist)[0], st4);
+  toString(&((struct BigInteger*)dist)[1], st5);
+  toString(&((struct BigInteger*)dist)[2], st6);
+  toString(num, st7);*/
+
+  toString(ha, st1);
+  toString(hb, st2);
+  toString(hc, st3);
+  toString(hd, st4);
+  toString(he, st5);
+  toString(hf, st6);
+  toString(num, st7);
+
+  fl = fopen_s(&f, "cuda_var.dat", "w+");
+
+  if (fl != 0)
+    exit(-905);
+
+  fprintf_s(f, "%s %s %s %s %s %s %i %i %s", st1, st2, st3, st4, st5, st6, arr[0], arr[1], st7);
+  fflush(f);
+  fclose(f);
+
+  free(st1);
+  free(st2);
+  free(st3);
+  free(st4);
+  free(st5);
+  free(st6);
+  free(st7);
+  free(f);
+  free(ha);
+  free(hb);
+  free(hc);
+  free(hd);
+  free(he);
+  free(hf);
+  free(min);
+  free(two);
+  free(four);
+  free(tmp);
+  free(m);
+}
+
 //Massive memory checking
 int memchk(int n, ...) {
     va_list pa;
     va_start(pa, n);
 
-    for (; n > 0; n--)
+    for (; n > 0; n--) 
         if ((void*)va_arg(pa, size_t) == NULL)
             return -1 * n;
 
