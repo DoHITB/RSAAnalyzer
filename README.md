@@ -23,18 +23,18 @@ This project uses BigInteger.c (https://github.com/DoHITB/BigInteger.c) and Logg
                    |              yes            no
                    |               |             |
                    |               V             V
-                   |        +--------------+  +----------------+
-                   |        |  get number  |  |   gather data  |
-                   |        +--------------+  +----------------+
-                   |        |   del.bat    |  | check solution | <---------+
-                   |        +--------------+  +------+---------+           |
-                   |        |    create    |         |                     |
-                   |        | waitlist.bat |       solves                  |
-                   |        +--------------+         |                     |
-             +-----+--------+ waitlist.bat |         |                     |
-             |     |        +--------------+         |                     |
-             |     |        |   create     |         |                     |
-             |     |        |   main.bat   |         |                     |
+                   |        +--------------+  +----------------+                    +------------------------+
+                   |        |  get number  |  |   gather data  +------------------> | EQSolver (CUDA Module) |
+                   |        +--------------+  +----------------+                    +-------------+----------+
+                   |        |   del.bat    |  | check solution | <---------+                      |
+                   |        +--------------+  +------+---------+           |                      |
+                   |        |    create    |         |                     |                      |
+                   |        | waitlist.bat |       solves                  |                      |
+                   |        +--------------+         |                     |                      |
+             +-----+--------+ waitlist.bat |         |                     |                      |
+             |     |        +--------------+         |                     |                      |
+             |     |        |   create     |         |                     |                      v
+             |     |        |   main.bat   |         |                     |                   Result
              |     |        +--------------+         |                     |
              |     |        |   main.bat   |         |                     |
              |     |        +------+-------+         |                     |
