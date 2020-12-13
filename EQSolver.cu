@@ -36,10 +36,9 @@ __device__ static void CUdivide(void* va, void* vb, void* xa, void* xb);
 __device__ void CUpAppend(void* va, int b);
 __device__ void CUsqrt(void* va, void* vb, void* vc, void* vd);
 
-__global__ void kernelCal(void* x, void* y, void* n, void* a, void* b, void* c, void* d, void* e, void* f, void* xa, void* xb, void* num, int* arr, void* r);
+__global__ void kernelCal(void* x, void* y, void* n, void* a, void* b, void* c, void* d, void* e, void* f, void* xa, void* xb, void* o, void* num, int* arr, void* r);
 __global__ void makeString(void* a, int count);
 __device__ int checkSolution(void* va, void* vb, void* xa, void* xb, int* arr, void* num);
-__global__ void propagateAdd(void* va, void* vb)
 /////////////////////////// FUNCTION DEFINITION ///////////////////////////
 
 /////////////////////////// BIGINTEGER MOCKUP ///////////////////////////
@@ -261,9 +260,9 @@ int main(int argc, char* argv[]) {
   //calculation begins
   while (ex == 0) {
     printf("Calculation - Loop Start @%i\n", clock());
-    str = clock();
+    str = clock(); 
 
-    kernelCal <<<cn, cn>>>(x, y, n, a, b, c, d, e, f, xa, xb, num, arr, r);
+    kernelCal <<<cn, cn>>>(x, y, n, a, b, c, d, e, f, xa, xb, o, num, arr, r);
     cuerr = cudaDeviceSynchronize();
 
     if (cuerr != 0) {
@@ -276,11 +275,13 @@ int main(int argc, char* argv[]) {
     printf("Calculation - Loop End @%i {%i values checked} ~ %f equations / msec\n", clock(), cn * cm, freq);
 
     //makeString<<<1, 1>>>(y, cn * cm);
+    
     //copy r to HOST
     cudaMemcpy(hr, r, sizeof(struct BigInteger), cudaMemcpyDeviceToHost);
     hardEquals(hr, zro, &ex);
 
-    propagateAdd <<<cn, cm>>>(n, o);
+    //temporal
+    //++ex;
   }
 
   //Loop exit. Display result
@@ -292,8 +293,8 @@ int main(int argc, char* argv[]) {
 
 
 /////////////////////////// CALCULATION DEFINITION ///////////////////////////
-//                        multi    multi    multi    single   single   single   single   single   single   multi     multi     single     2         single
-__global__ void kernelCal(void* x, void* y, void* n, void* a, void* b, void* c, void* d, void* e, void* f, void* xa, void* xb, void* num, int* arr, void* r) {
+//                        multi    multi    multi    single   single   single   single   single   single   multi     multi     single   single     2         single
+__global__ void kernelCal(void* x, void* y, void* n, void* a, void* b, void* c, void* d, void* e, void* f, void* xa, void* xb, void* o, void* num, int* arr, void* r) {
   //x = d
   memcpy(&((struct BigInteger*)x)[blockIdx.x * blockDim.x + threadIdx.x], d, sizeof(struct BigInteger));
 
@@ -360,6 +361,9 @@ __global__ void kernelCal(void* x, void* y, void* n, void* a, void* b, void* c, 
                     &((struct BigInteger*)xb)[blockIdx.x * blockDim.x + threadIdx.x],
                     arr, num) == 0)
     memcpy(r, &((struct BigInteger*)y)[blockIdx.x * blockDim.x + threadIdx.x], sizeof(struct BigInteger));
+
+  //n += o
+  CUpAdd(&((struct BigInteger*)n)[blockIdx.x * blockDim.x + threadIdx.x], o);
 }
 
 //                         multi
@@ -427,12 +431,6 @@ __device__ int checkSolution(void* va, void* vb, void* xa, void* xb, int* arr, v
 
   //retornamos y sea cual sea el resultado
   return y;
-}
-
-//                           multi     single
-__global__ void propagateAdd(void* va, void* vb) {
-  //va += vb
-  CUpAdd(&((struct BigInteger*)va)[blockIdx.x * blockDim.x + threadIdx.x], vb);
 }
 
 /////////////////////////// MOCK-UP DEFINITION ///////////////////////////
@@ -626,6 +624,7 @@ __device__ void CUpSub(void* va, void* vb) {
     ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   else if (sig == 11)
     ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+
 }
 
 //mock-up for subtract
