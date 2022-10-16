@@ -1,7 +1,7 @@
 /*
  * RSAAnalyzer.c
  *
- *  Created on: 27 sep. 2020
+ *  Created on: 27 sep. 2020. Reviewed on 23 sep. 2022
  *      Author: DoHITB under MIT Liscense
  */
 #include "conio.h"
@@ -140,7 +140,11 @@ int main(int argc, char* argv[]) {
   BigInteger* i = malloc(sizeof(BigInteger));
 
   //memory pool
-  struct memory* m = malloc(getMemorySize());
+  memory* m = malloc(getMemorySize());
+
+  //Bolzano limit
+  BigInteger* baxis = malloc(sizeof(BigInteger));
+  BigInteger* bvalue = malloc(sizeof(BigInteger));
 
   //memory checking
   int mm;
@@ -152,7 +156,7 @@ int main(int argc, char* argv[]) {
   if (mm < 0)
     exit(mm);
 
-  //temporal
+  //debug override
   if (debug == 2) {
     testing();
   }
@@ -195,10 +199,8 @@ int main(int argc, char* argv[]) {
   if (argc == 1) {
     printf("Number to analyse: ");
     gets_s(number, 4096);
-  }
-  else {
+  } else 
     strcpy_s(number, 4096, argv[1]);
-  }
 
   _log("number: %s", INFORMATIONAL, number);
 
@@ -293,11 +295,11 @@ int main(int argc, char* argv[]) {
      *******POOL GENERATION SECTION*******
      *************************************/
 
-     //only an argument ==> generate pool
-     //0               1   2    3
-     //RSAAnalyzer.exe num #arr #S
+    //only an argument ==> generate pool
+    //0               1   2    3
+    //RSAAnalyzer.exe num #arr #S
 
-     //delete previous files
+    //delete previous files
     system("del.bat 2>nul");
 
     _log("", ERROR);
@@ -444,9 +446,9 @@ int main(int argc, char* argv[]) {
      *****GATHER & CALCULATE SECTION*****
      ************************************/
 
-     //Gather and calculate
-     //0               1   2    3
-     //RSAAnalyzer.exe num #arr #S
+    //Gather and calculate
+    //0               1   2    3
+    //RSAAnalyzer.exe num #arr #S
     BImemcpy(n, -1);
 
     if (debug == 0) {
@@ -665,7 +667,7 @@ int main(int argc, char* argv[]) {
       _log("dif: <%s, %s, %s>", INFORMATIONAL, st1, st2, st3);
 
       _log("Hyperbolic-Potential limit...", INFORMATIONAL);
-      hbBolzano(dif, dist, bist, m);
+      hbBolzano(dif, dist, bist, m, baxis, bvalue);
 
       inFunction();
       _log("Solving x...", INFORMATIONAL);
@@ -755,8 +757,7 @@ int main(int argc, char* argv[]) {
               //p = print status
               toString(i, st6);
               _log("%s\t%s\t%s\t%s\t%s\t{%s}", ERROR, st1, st2, st3, st4, st5, st6);
-            }
-            else if (setc == 'x') {
+            } else if (setc == 'x') {
               //x = quit
               toString(i, st6);
               _log("%s\t%s\t%s\t%s\t%s\t{%s}", ERROR, st1, st2, st3, st4, st5, st6);
@@ -781,7 +782,7 @@ int main(int argc, char* argv[]) {
       }
     } else {
       //GPU mode.
-      cudaMode(dif, dist, arr, num);
+      cudaMode(dif, dist, arr, num, baxis, bvalue);
 
       exit(0);
     }
@@ -806,8 +807,7 @@ int main(int argc, char* argv[]) {
       fputs(out, bcs);
       fflush(bcs);
       fclose(bcs);
-    }
-    else if (ext == -1) {
+    } else if (ext == -1) {
       //found on this thread (while gathering data)!
       //prepare text
       toString(&sols[0], st1);
@@ -856,16 +856,13 @@ void poss(int ind, int num, int* arr) {
   if (ind == 1) {
     arr[0] = n1[num];
     arr[1] = n2[num];
-  }
-  else if (ind == 2) {
+  } else if (ind == 2) {
     arr[0] = n3[num];
     arr[1] = n4[num];
-  }
-  else if (ind == 3) {
+  } else if (ind == 3) {
     arr[0] = n5[num];
     arr[1] = n6[num];
-  }
-  else {
+  } else {
     arr[0] = 0;
     arr[1] = 0;
   }
@@ -952,7 +949,7 @@ void getSqrt(void* num, int* arr, void* res, void* m) {
   if (gsEnd > arr[1])
     add(res, ten, m); //res += 10;
 
-//override ending with specific number
+  //override ending with specific number
   ((BigInteger*)res)->n[0] = arr[1];
 
   free(ten);
@@ -1017,8 +1014,7 @@ int getZF(int* arr) {
     if (arr[1] == 7) {
       //{3, 7}
       return 9;
-    }
-    else {
+    } else {
       return 3;
     }
   }
@@ -1065,8 +1061,7 @@ int getS(int* arr) {
     if (arr[1] == 7) {
       //37 => S = 9
       return 9;
-    }
-    else {
+    } else {
       //39 => S = 3
       return 3;
     }
@@ -1186,8 +1181,7 @@ void getPonderated(void* num, int ia, void* b, int k, int z, void* n, void* res,
     memcpy(pN, num, sizeof(BigInteger));                                          //  pN = num;
     dvs(pN, b, m);                                                                //  pN = pN / b;
     dvs(pN, hun, m);                                                              //  pN = pN / hun (100);
-  }
-  else {                                                                          //} else {
+  } else {                                                                        //} else {
     memcpy(pN, n, sizeof(BigInteger));                                            //  pN = n;
   }                                                                               //}
 
@@ -1725,15 +1719,13 @@ void gsignum(void* a, void* b, void* res) {
   equals(a, z, m, k1);                ////¿a < z? => k1
   equals(b, z, m, k2);                ////¿b < z? => k2
 
-  if (*k1 == 2 && *k2 == 2) {         //if(a < 0 && b < 0){
+  if (*k1 == 2 && *k2 == 2)           //if(a < 0 && b < 0){
     BImemcpy(res, -1);                //  res = -1;
-  }
-  else if (*k1 == 1 && *k2 == 1) {    //}else if(a > 0 && b > 0){
+  else if (*k1 == 1 && *k2 == 1)      //}else if(a > 0 && b > 0){
     BImemcpy(res, -1);                //  res = -1;
-  }
-  else {                              //}else{
+  else                                //}else{
     BImemcpy(res, 1);                 //  res = 1;
-  }                                   //}
+                                      //}
 
   free(z);
   free(o);
@@ -2226,7 +2218,7 @@ void lowerLimit(void* dif, void* dist, void* m) {
 }
 
 //Gets the hyperbolic jump limit using Bolzano aproximation
-void hbBolzano(void* dif, void* dist, void* bist, void* m) {
+void hbBolzano(void* dif, void* dist, void* bist, void* m, void *baxis, void *bvalue) {
   /*
    * The consecutive solutions for quadratic equation works on a hpyerbolic-potential way.
    * So, there's a point on which ceiling values for solutions begin to repeat; at first
@@ -2328,16 +2320,14 @@ void hbBolzano(void* dif, void* dist, void* bist, void* m) {
       //fst == scd                                                                                          //    //fst == scd
       toString(base, st1);
       _log("Bolzano approach: %s", ERROR, st1);
-    }
-    else {                                                                                                  //  } else {
+    } else {                                                                                                //  } else {
       equals(scd, trd, m, chk);                                                                             //    scd = trd?
 
       if (*chk == 0) {                                                                                      //    if(scd == trd) {
         //scd == trd                                                                                        //      //scd == trd
         toString(base, st1);
         _log("Bolzano approach: %s", ERROR, st1);
-      }
-      else {                                                                                                //    } else {
+      } else {                                                                                              //    } else {
      //fst != scd != trd; increase base                                                                     //      //fst != scd != trd; increase base
         mul(base, ten, m);                                                                                  //      base *= ten;
       }                                                                                                     //    }
@@ -2409,15 +2399,13 @@ void hbBolzano(void* dif, void* dist, void* bist, void* m) {
       if (*chk == 0) {                                                                                      //    if(fst == scd) {
         //fst == scd; decrease base                                                                         //      //fst == scd; decrease base
         sub(offset, base, m);                                                                               //      offset -= base;
-      }
-      else {                                                                                                //    } else {
+      } else {                                                                                              //    } else {
         equals(scd, trd, m, chk);                                                                           //      scd == trd?
 
         if (*chk == 0) {                                                                                    //      if(scd == trd) {
           //scd == trd; decrease base                                                                       //        //scd == trd; decrease base
           sub(offset, base, m);                                                                             //        offset -= base;
-        }
-        else {                                                                                              //      } else {
+        } else {                                                                                            //      } else {
        //fst != scd != trd; got it                                                                          //        //fst != scd != trd; got it
           toString(offset, st1);
           _log("Bolzano approach break: %s", ERROR, st1);
@@ -2448,6 +2436,9 @@ void hbBolzano(void* dif, void* dist, void* bist, void* m) {
     }                                                                                                       //  }
   }                                                                                                         //}
 
+  memcpy(baxis, offset, sizeof(BigInteger));
+  memcpy(bvalue, trd, sizeof(BigInteger));
+
   toString(offset, st1);
   _log("Hyperbolic-Potential limit (axis): %s", ERROR, st1);
 
@@ -2475,7 +2466,7 @@ void hbBolzano(void* dif, void* dist, void* bist, void* m) {
 }
 
 //dumps a file and starts cuda engine
-static void cudaMode(void* dif, void* dist, int* arr, void* num) {
+static void cudaMode(void* dif, void* dist, int* arr, void* num, void* baxis, void* bvalue) {
   FILE* f;
   int fl;
   char* st1;
@@ -2485,6 +2476,8 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   char* st5;
   char* st6;
   char* st7;
+  char* st8;
+  char* st9;
   BigInteger* ha = malloc(sizeof(BigInteger));
   BigInteger* hb = malloc(sizeof(BigInteger));
   BigInteger* hc = malloc(sizeof(BigInteger));
@@ -2496,6 +2489,7 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   BigInteger* four = malloc(sizeof(BigInteger));
   BigInteger* tmp = malloc(sizeof(BigInteger));
   struct memory* m = malloc(getMemorySize());
+  int mm = 0;
 
   iniStr(&st1);
   iniStr(&st2);
@@ -2504,7 +2498,14 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   iniStr(&st5);
   iniStr(&st6);
   iniStr(&st7);
+  iniStr(&st8);
+  iniStr(&st9);
   init(m);
+
+  mm = memchk(19, st1, st2, st3, st4, st5, st6, st7, st8, st9, ha, hb, hc, hd, he, hf, min, two, four, tmp);
+
+  if (mm < 0)
+    exit(-878);
 
   //dif[0] = k
   memcpy(ha, &((BigInteger*)dif)[0], sizeof(BigInteger));
@@ -2563,16 +2564,6 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   memcpy(hf, &((BigInteger*)dif)[0], sizeof(BigInteger));
   mul(hf, two, m);
 
-  /*
-  toString(&((BigInteger*)dif)[0], st1);
-  toString(&((BigInteger*)dif)[1], st2);
-  toString(&((BigInteger*)dif)[2], st3);
-  toString(&((BigInteger*)dist)[0], st4);
-  toString(&((BigInteger*)dist)[1], st5);
-  toString(&((BigInteger*)dist)[2], st6);
-  toString(num, st7);
-  */
-
   toString(ha, st1);
   toString(hb, st2);
   toString(hc, st3);
@@ -2580,13 +2571,15 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   toString(he, st5);
   toString(hf, st6);
   toString(num, st7);
+  toString(bvalue, st8);
+  toString(baxis, st9);
 
   fl = fopen_s(&f, "cuda_var.dat", "w+");
 
   if (fl != 0)
     exit(-905);
 
-  fprintf_s(f, "%s %s %s %s %s %s %i %i %s", st1, st2, st3, st4, st5, st6, arr[0], arr[1], st7);
+  fprintf_s(f, "%s %s %s %s %s %s %i %i %s %s %s", st1, st2, st3, st4, st5, st6, arr[0], arr[1], st7, st8, st9);
   fflush(f);
   fclose(f);
 
@@ -2597,6 +2590,8 @@ static void cudaMode(void* dif, void* dist, int* arr, void* num) {
   free(st5);
   free(st6);
   free(st7);
+  free(st8);
+  free(st9);
   free(f);
   free(ha);
   free(hb);
